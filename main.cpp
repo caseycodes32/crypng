@@ -134,7 +134,9 @@ int main(int, char**)
 
         ImGui::SetNextWindowSize(ImVec2(k_WindowSize.x, k_WindowSize.y));
         ImGui::SetNextWindowPos(ImVec2(0, 0));
-        ImGui::Begin("crypng", &open, dwFlag); 
+        ImGui::Begin("crypng", &open, dwFlag);
+
+        (ImGui::Button("Select Image"));
         
         ImGui::End();
 
