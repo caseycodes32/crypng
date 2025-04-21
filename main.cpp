@@ -8,6 +8,8 @@
 #include <GL/GL.h>
 #include <tchar.h>
 
+#include "image_handler.h"
+
 // Data stored per platform window
 struct WGL_WindowData { HDC hDC; };
 
@@ -21,6 +23,9 @@ static int              g_Width;
 static int              g_Height;
 static bool             g_MouseDownOnHeader;
 static POINT            g_LastMousePos;
+
+// Program Data
+std::string             s_ImageInputPath;
 
 // Forward declarations of helper functions
 bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
@@ -136,7 +141,10 @@ int main(int, char**)
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::Begin("crypng", &open, dwFlag);
 
-        (ImGui::Button("Select Image"));
+        if (ImGui::Button("Select Image"))
+        {
+            OpenFileDialog(s_ImageInputPath, hwnd);
+        }
         
         ImGui::End();
 
