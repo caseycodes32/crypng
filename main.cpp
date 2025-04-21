@@ -141,9 +141,14 @@ int main(int, char**)
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::Begin("crypng", &open, dwFlag);
 
-        if (ImGui::Button("Select Image"))
+        if (ImGui::Button("Select Image")) OpenFileDialog(s_ImageInputPath, hwnd);
+
+        if (s_ImageInputPath.length() > 0)
         {
-            OpenFileDialog(s_ImageInputPath, hwnd);
+            ImGui::Text("Image: %s", s_ImageInputPath.c_str());
+            static int width;
+            static int height;
+            ImGuiDisplayImage(s_ImageInputPath, width, height);
         }
         
         ImGui::End();
