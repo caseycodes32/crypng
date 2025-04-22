@@ -36,9 +36,24 @@ bool LoadTextureFromMemory(const void* data, size_t data_size, GLuint* out_textu
     // Load from file
     int image_width = 0;
     int image_height = 0;
-    unsigned char* image_data = stbi_load_from_memory((const unsigned char*)data, (int)data_size, &image_width, &image_height, NULL, 4);
+    int image_channels = 0;
+    unsigned char* image_data = stbi_load_from_memory((const unsigned char*)data, (int)data_size, &image_width, &image_height, &image_channels, 4);
     if (image_data == NULL)
         return false;
+
+    // invert colors by modifying image_data array
+    for (int y = 0; y < image_height; y++)
+    {
+        for (int x = 0; x < image_width; x++)
+        {
+            int idx = (y * image_width + x) * image_channels;
+            
+            image_data[idx] = 255 - image_data[idx];
+            image_data[idx + 1] = 255 - image_data[idx + 1]; // Green
+            image_data[idx + 2] = 255 - image_data[idx + 2]; // Blue
+            
+        }
+    }
 
     // Create a OpenGL texture identifier
     GLuint image_texture;
