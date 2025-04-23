@@ -47,6 +47,7 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
 
     unsigned char* image_data = stbi_load_from_memory((const unsigned char*)file_data, (int)file_size, &image_details.width, &image_details.height, &image_details.channels, 4);
     image_details.data = image_data;
+    image_details.data_size = file_size;
 
     free(file_data);
     return true;
@@ -96,10 +97,31 @@ void ImGuiDisplayImage(ImageDetails image_details)
         height = 350;
         width = (static_cast<float>(image_details.width) / image_details.height) * 350;
     }
-
+    ZeroLSB(image_details);
     LoadTextureFromData(&gl_ImageTexture, image_details);
     ImGui::Image((ImTextureID)(intptr_t)gl_ImageTexture, ImVec2(width, height));
     t_ImageData = image_details.data;
+}
+
+void ZeroLSB(ImageDetails image_details)
+{
+    for (int y = 0; y < image_details.height; y++)
+    {
+        for (int x = 0; x < image_details.width; x++)
+        {
+            int idx = (y * image_details.width + x) * 4;
+            
+            image_details.data[idx] =  image_details.data[idx] >> 1;
+            image_details.data[idx] =  image_details.data[idx] << 1;
+            
+            image_details.data[idx + 1] =  image_details.data[idx + 1] >> 1;
+            image_details.data[idx + 1] =  image_details.data[idx + 1] << 1;
+
+            image_details.data[idx + 2] =  image_details.data[idx + 2] >> 1;
+            image_details.data[idx + 2] =  image_details.data[idx + 2] << 1;
+            
+        }
+    }
 }
 
 
