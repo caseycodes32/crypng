@@ -42,13 +42,18 @@ bool SaveFileDialog(std::string &file_path, HWND hwnd)
     ofn.hwndOwner = NULL;
     ofn.lpstrFile = c_FilePath;
     ofn.nMaxFile = MAX_PATH;
-    ofn.lpstrFilter = "Image Files\0*.png\0";
+    ofn.lpstrFilter = "PNG Files\0*.png\0";
     ofn.nFilterIndex = 1;
-    ofn.Flags = OFN_EXPLORER;
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 
-    if (GetOpenFileNameA(&ofn) == TRUE)
+    if (GetSaveFileNameA(&ofn) == TRUE)
     {
         file_path = std::string(c_FilePath);
+        std::filesystem::path p_FilePath(file_path);
+
+        if (p_FilePath.extension().string() != ".png")
+            file_path.append(".png");
+
         return true;
     }
     else file_path = "";
