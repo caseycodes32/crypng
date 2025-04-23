@@ -6,5 +6,15 @@
 #include <GL/gl.h>
 #include "imgui.h"
 
+struct ImageDetails
+{
+    unsigned char *data;
+    int width;
+    int height;
+    int channels;
+};
+
 bool OpenFileDialog(std::string &file_path, HWND hwnd);
-void ImGuiDisplayImage(std::string image_path, int &width, int &height);
+bool LoadDataFromFile(std::string image_path, ImageDetails &image_details);
+void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details);
+void ImGuiDisplayImage(ImageDetails image_details);

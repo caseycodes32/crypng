@@ -25,7 +25,8 @@ static bool             g_MouseDownOnHeader;
 static POINT            g_LastMousePos;
 
 // Program Data
-std::string             s_ImageInputPath;
+std::string             m_ImageInputPath;
+ImageDetails            m_ImageDetails;
 
 // Forward declarations of helper functions
 bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
@@ -141,14 +142,19 @@ int main(int, char**)
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::Begin("crypng", &open, dwFlag);
 
-        if (ImGui::Button("Select Image")) OpenFileDialog(s_ImageInputPath, hwnd);
-
-        if (s_ImageInputPath.length() > 0)
+        if (ImGui::Button("Select Image")) 
         {
-            ImGui::Text("Image: %s", s_ImageInputPath.c_str());
-            static int width;
-            static int height;
-            ImGuiDisplayImage(s_ImageInputPath, width, height);
+            OpenFileDialog(m_ImageInputPath, hwnd);
+            m_ImageDetails = ImageDetails{};
+        }
+
+        if (m_ImageInputPath.length() > 0)
+        {
+            ImGui::Text("Image: %s", m_ImageInputPath.c_str());
+
+            LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
+
+            ImGuiDisplayImage(m_ImageDetails);
         }
         
         ImGui::End();

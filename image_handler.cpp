@@ -27,21 +27,86 @@ bool OpenFileDialog(std::string &file_path, HWND hwnd)
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-// OpenGL image loading functions LoadTextureFromMemory() and LoadTextureFromFile()
+// Image data and texture handling functions LoadDataFromFile() and LoadTextureFromData() derived from LoadTextureFromMemory() and LoadTextureFromFile()
 // Courtesy of https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples#example-for-opengl-users
-
-// Simple helper function to load an image into a OpenGL texture with common settings
-bool LoadTextureFromMemory(const void* data, size_t data_size, GLuint* out_texture, int* out_width, int* out_height)
+bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
 {
-    // Load from file
-    int image_width = 0;
-    int image_height = 0;
-    int image_channels = 0;
-    unsigned char* image_data = stbi_load_from_memory((const unsigned char*)data, (int)data_size, &image_width, &image_height, &image_channels, 4);
-    if (image_data == NULL)
-        return false;
+    if (image_details.data != NULL) return false;
 
-    // invert colors by modifying image_data array
+    FILE* f = fopen(image_path.c_str(), "rb");
+    if (f == NULL)
+        return false;
+    fseek(f, 0, SEEK_END);
+    size_t file_size = (size_t)ftell(f);
+    if (file_size == -1)
+        return false;
+    fseek(f, 0, SEEK_SET);
+    void* file_data = malloc(file_size);
+    fread(file_data, 1, file_size, f);
+    fclose(f);
+
+    unsigned char* image_data = stbi_load_from_memory((const unsigned char*)file_data, (int)file_size, &image_details.width, &image_details.height, &image_details.channels, 4);
+    image_details.data = image_data;
+
+    free(file_data);
+    return true;
+}
+
+void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details)
+{
+    if (*(out_texture) == 0)
+    {
+        if (image_details.data != NULL)
+        {
+            // Create a OpenGL texture identifier
+            GLuint gl_ImageTexture;
+            glGenTextures(1, &gl_ImageTexture);
+            glBindTexture(GL_TEXTURE_2D, gl_ImageTexture);
+
+            // Setup filtering parameters for display
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            // Upload pixels into texture
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_details.width, image_details.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_details.data);
+            //stbi_image_free(image_data);
+
+            *out_texture = gl_ImageTexture;
+        }
+    }
+}
+
+void ImGuiDisplayImage(ImageDetails image_details)
+{
+    static GLuint gl_ImageTexture = 0;
+    static unsigned char *t_ImageData = 0;
+    int width = 0;
+    int height = 0;
+
+    if (image_details.data != t_ImageData) gl_ImageTexture = 0;
+
+    if (image_details.width > image_details.height)
+    {
+        width = 350;
+        height = (static_cast<float>(image_details.height) / image_details.width) * 350;
+    }
+    else
+    {
+        height = 350;
+        width = (static_cast<float>(image_details.width) / image_details.height) * 350;
+    }
+
+    LoadTextureFromData(&gl_ImageTexture, image_details);
+    ImGui::Image((ImTextureID)(intptr_t)gl_ImageTexture, ImVec2(width, height));
+    t_ImageData = image_details.data;
+}
+
+
+
+/*
+
+// invert colors by modifying image_data array
     for (int y = 0; y < image_height; y++)
     {
         for (int x = 0; x < image_width; x++)
@@ -54,54 +119,5 @@ bool LoadTextureFromMemory(const void* data, size_t data_size, GLuint* out_textu
             
         }
     }
-
-    // Create a OpenGL texture identifier
-    GLuint image_texture;
-    glGenTextures(1, &image_texture);
-    glBindTexture(GL_TEXTURE_2D, image_texture);
-
-    // Setup filtering parameters for display
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Upload pixels into texture
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-    stbi_image_free(image_data);
-
-    *out_texture = image_texture;
-    *out_width = image_width;
-    *out_height = image_height;
-
-    return true;
-}
-
-// Open and read a file, then forward to LoadTextureFromMemory()
-bool LoadTextureFromFile(const char* file_name, GLuint* out_texture, int* out_width, int* out_height)
-{
-    FILE* f = fopen(file_name, "rb");
-    if (f == NULL)
-        return false;
-    fseek(f, 0, SEEK_END);
-    size_t file_size = (size_t)ftell(f);
-    if (file_size == -1)
-        return false;
-    fseek(f, 0, SEEK_SET);
-    void* file_data = IM_ALLOC(file_size);
-    fread(file_data, 1, file_size, f);
-    fclose(f);
-    bool ret = LoadTextureFromMemory(file_data, file_size, out_texture, out_width, out_height);
-    IM_FREE(file_data);
-    return ret;
-}
-
-void ImGuiDisplayImage(std::string image_path, int &width, int &height)
-{
-    int d_ImageWidth = 0;
-    int d_ImageHeight = 0;
-    GLuint gl_ImageTexture = 0;
-    LoadTextureFromFile(image_path.c_str(), &gl_ImageTexture, &d_ImageWidth, &d_ImageHeight);
-    ImGui::Image((ImTextureID)(intptr_t)gl_ImageTexture, ImVec2(d_ImageWidth, d_ImageHeight));
-    width = d_ImageWidth;
-    height = d_ImageHeight;
-}
+        
+*/
