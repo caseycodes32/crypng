@@ -23,9 +23,34 @@ bool OpenFileDialog(std::string &file_path, HWND hwnd)
     return false;
 }
 
+bool SaveFileDialog(std::string &file_path, HWND hwnd)
+{
+    char c_FilePath[MAX_PATH] = "";
+    OPENFILENAMEA ofn;
+    ZeroMemory(&ofn, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = NULL;
+    ofn.lpstrFile = c_FilePath;
+    ofn.nMaxFile = MAX_PATH;
+    ofn.lpstrFilter = "Image Files\0*.png\0";
+    ofn.nFilterIndex = 1;
+    ofn.Flags = OFN_EXPLORER;
+
+    if (GetOpenFileNameA(&ofn) == TRUE)
+    {
+        file_path = std::string(c_FilePath);
+        return true;
+    }
+    else file_path = "";
+    
+    return false;
+}
+
 #define _CRT_SECURE_NO_WARNINGS
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image.h"
+#include "stb_image_write.h"
 
 // Image data and texture handling functions LoadDataFromFile() and LoadTextureFromData() derived from LoadTextureFromMemory() and LoadTextureFromFile()
 // Courtesy of https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples#example-for-opengl-users
@@ -51,6 +76,13 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
 
     free(file_data);
     return true;
+}
+
+void SaveDataToFile(std::string output_path, ImageDetails image_details)
+{
+    int stride_bytes = image_details.width * image_details.channels;
+    stbi_write_png_compression_level = 0;
+    stbi_write_png(output_path.c_str(), image_details.width, image_details.height, image_details.channels, image_details.data, stride_bytes);
 }
 
 void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details)
