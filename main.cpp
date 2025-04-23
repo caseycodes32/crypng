@@ -15,6 +15,8 @@ struct WGL_WindowData { HDC hDC; };
 
 // Constants
 static const POINT      k_WindowSize = {400, 400};
+enum UIPage { SELECT_FILE, HIDE_MESSAGE, RETRIEVE_MESSAGE, PROCESS_IMAGE, SAVE_IMAGE };
+
 
 // UI Data
 static HGLRC            g_hRC;
@@ -27,6 +29,7 @@ static POINT            g_LastMousePos;
 // Program Data
 std::string             m_ImageInputPath;
 ImageDetails            m_ImageDetails;
+UIPage                  m_UIPage = SELECT_FILE;
 
 // Forward declarations of helper functions
 bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
@@ -142,19 +145,26 @@ int main(int, char**)
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::Begin("crypng", &open, dwFlag);
 
-        if (ImGui::Button("Select Image")) 
+        if (m_UIPage == SELECT_FILE)
         {
-            OpenFileDialog(m_ImageInputPath, hwnd);
-            m_ImageDetails = ImageDetails{};
-        }
+            if (m_ImageInputPath.length() > 0)
+            {
+                ImGui::Text("Image: %s", m_ImageDetails.name.c_str());
 
-        if (m_ImageInputPath.length() > 0)
-        {
-            ImGui::Text("Image: %s", m_ImageInputPath.c_str());
+                LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
 
-            LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
-
-            ImGuiDisplayImage(m_ImageDetails);
+                ImGuiDisplayImage(m_ImageDetails);
+            }
+            else
+            {
+                ImGui::Text("Thanks for using crypng by Kyle Meyer");
+                ImGui::Text("Select a png image to get started:");
+                if (ImGui::Button("Select Image")) 
+                {
+                    OpenFileDialog(m_ImageInputPath, hwnd);
+                    m_ImageDetails = ImageDetails{};
+                }
+            }
         }
         
         ImGui::End();

@@ -1,5 +1,15 @@
 #include "image_handler.h"
 
+std::string FilenameFromPath(std::string path)
+{
+    size_t idxLastSlash = path.find_last_of("/\\");
+    if (idxLastSlash != std::string::npos)
+    {
+        return path.substr(idxLastSlash + 1);
+    }
+    return path;
+}
+
 bool OpenFileDialog(std::string &file_path, HWND hwnd)
 {
     char c_FilePath[MAX_PATH] = "";
@@ -72,7 +82,7 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
 
     unsigned char* image_data = stbi_load_from_memory((const unsigned char*)file_data, (int)file_size, &image_details.width, &image_details.height, &image_details.channels, 4);
     image_details.data = image_data;
-    image_details.data_size = file_size;
+    image_details.name = FilenameFromPath(image_path);
 
     free(file_data);
     return true;
@@ -114,9 +124,10 @@ void ImGuiDisplayImage(ImageDetails image_details)
 {
     static GLuint gl_ImageTexture = 0;
     static unsigned char *t_ImageData = 0;
-    int width = 0;
-    int height = 0;
+    int width = 200;
+    int height = 200;
 
+    
     if (image_details.data != t_ImageData) gl_ImageTexture = 0;
 
     if (image_details.width > image_details.height)
@@ -129,7 +140,8 @@ void ImGuiDisplayImage(ImageDetails image_details)
         height = 350;
         width = (static_cast<float>(image_details.width) / image_details.height) * 350;
     }
-    ZeroLSB(image_details);
+
+    //roLSB(image_details);
     LoadTextureFromData(&gl_ImageTexture, image_details);
     ImGui::Image((ImTextureID)(intptr_t)gl_ImageTexture, ImVec2(width, height));
     t_ImageData = image_details.data;
