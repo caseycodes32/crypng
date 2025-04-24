@@ -85,7 +85,7 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
         image_details.normalized_width = (static_cast<float>(image_details.width) / image_details.height) * 384;
     }
 
-    LSBtoMSB(image_details);
+    //LSBtoMSB(image_details);
     
     return true;
 }
@@ -135,6 +135,7 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool s
 
             // Upload pixels into texture
             glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
             switch (image_details.channels)
             {
                 case 3:
@@ -158,8 +159,9 @@ void ImGuiDisplayImage(ImageDetails image_details)
     //roLSB(image_details);
     if (t_ImageData != image_details.data)
     {
-        gl_ImageTexture = 0;
         stbi_image_free(t_ImageData);
+        glDeleteTextures(1, &gl_ImageTexture);
+        gl_ImageTexture = 0;
     }
     LoadTextureFromData(&gl_ImageTexture, image_details, true);
     ImGui::Image((ImTextureID)(intptr_t)gl_ImageTexture, ImVec2(image_details.normalized_width, image_details.normalized_height));
@@ -194,7 +196,6 @@ void ZeroLSB(ImageDetails image_details)
 
             image_details.data[idx + 2] =  image_details.data[idx + 2] >> 1;
             image_details.data[idx + 2] =  image_details.data[idx + 2] << 1;
-            
         }
     }
 }
@@ -216,27 +217,6 @@ void LSBtoMSB(ImageDetails image_details)
 
                 image_details.data[idx + 2] = 0;
             }
-            
         }
     }
 }
-
-
-
-/*
-
-// invert colors by modifying image_data array
-    for (int y = 0; y < image_height; y++)
-    {
-        for (int x = 0; x < image_width; x++)
-        {
-            int idx = (y * image_width + x) * image_channels;
-            
-            image_data[idx] = 255 - image_data[idx];
-            image_data[idx + 1] = 255 - image_data[idx + 1]; // Green
-            image_data[idx + 2] = 255 - image_data[idx + 2]; // Blue
-            
-        }
-    }
-        
-*/
