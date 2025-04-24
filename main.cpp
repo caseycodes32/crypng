@@ -14,7 +14,7 @@
 struct WGL_WindowData { HDC hDC; };
 
 // Constants
-static const POINT      k_WindowSize = {400, 400};
+static const POINT      k_WindowSize = {400, 500};
 enum UIPage { SELECT_FILE, HIDE_MESSAGE, RETRIEVE_MESSAGE, PROCESS_IMAGE, SAVE_IMAGE };
 
 
@@ -28,6 +28,7 @@ static POINT            g_LastMousePos;
 
 // Program Data
 std::string             m_ImageInputPath;
+std::string             m_ImageOutputPath;
 ImageDetails            m_ImageDetails;
 UIPage                  m_UIPage = SELECT_FILE;
 
@@ -147,15 +148,7 @@ int main(int, char**)
 
         if (m_UIPage == SELECT_FILE)
         {
-            if (m_ImageInputPath.length() > 0)
-            {
-                ImGui::Text("Image: %s", m_ImageDetails.name.c_str());
-
-                LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
-
-                ImGuiDisplayImage(m_ImageDetails);
-            }
-            else
+            if (m_ImageInputPath == "")
             {
                 ImGui::Text("Thanks for using crypng by Kyle Meyer");
                 ImGui::Text("Select a png image to get started:");
@@ -163,6 +156,18 @@ int main(int, char**)
                 {
                     OpenFileDialog(m_ImageInputPath, hwnd);
                     m_ImageDetails = ImageDetails{};
+                }
+            }
+            else
+            {
+                ImGui::Text("Image: %s | %dx%d | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
+                LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
+                ImGuiDisplayImage(m_ImageDetails);
+
+                if (ImGui::Button("Save Image")) 
+                {
+                    SaveFileDialog(m_ImageOutputPath, hwnd);
+                    SaveDataToFile(m_ImageOutputPath, m_ImageDetails);
                 }
             }
         }
