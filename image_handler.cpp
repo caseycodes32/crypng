@@ -1,4 +1,5 @@
 #include "image_handler.h"
+#include "logo.h"
 
 std::string FilenameFromPath(std::string path)
 {
@@ -49,8 +50,6 @@ bool SaveFileDialog(std::string &file_path, HWND hwnd)
     if (GetSaveFileNameA(&ofn) == TRUE)
     {
         file_path = std::string(c_FilePath);
-
-        //size_t t_DotIdx = file_path.find_last_of(".");
         if (file_path.substr(file_path.length() - 4) != ".png")
             file_path.append(".png");
 
@@ -67,34 +66,24 @@ bool SaveFileDialog(std::string &file_path, HWND hwnd)
 #include "stb_image.h"
 #include "stb_image_write.h"
 
-// Image data and texture handling functions LoadDataFromFile() and LoadTextureFromData() derived from LoadTextureFromMemory() and LoadTextureFromFile()
-// Courtesy of https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples#example-for-opengl-users
 bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
 {
-    if (image_details.data != NULL) return false;
-
-    /*
-
-    FILE* f = fopen(image_path.c_str(), "rb");
-    if (f == NULL)
+    if (image_details.data != NULL)
         return false;
-    fseek(f, 0, SEEK_END);
-    size_t file_size = (size_t)ftell(f);
-    if (file_size == -1)
-        return false;
-    fseek(f, 0, SEEK_SET);
-    void* file_data = malloc(file_size);
-    fread(file_data, 1, file_size, f);
-    fclose(f);
-
-    unsigned char* image_data = stbi_load_from_memory((const unsigned char*)file_data, (int)file_size, &image_details.width, &image_details.height, &image_details.channels, 4);
-    image_details.data = image_data;
-    image_details.name = FilenameFromPath(image_path);
-
-    free(file_data);
-    */
 
     image_details.data = stbi_load(image_path.c_str(), &image_details.width, &image_details.height, &image_details.channels, 0);
+    image_details.name = FilenameFromPath(image_path);
+
+    return true;
+}
+
+bool LoadDataFromArray(unsigned char* buffer, int buffer_length, std::string name, ImageDetails &image_details)
+{
+    if (image_details.data != NULL)
+        return false;
+
+    image_details.data = stbi_load_from_memory(buffer, buffer_length, &image_details.width, &image_details.height, &image_details.channels, 4);
+    image_details.name = name;
 
     return true;
 }
@@ -106,6 +95,8 @@ void SaveDataToFile(std::string output_path, ImageDetails image_details)
     stbi_write_png(output_path.c_str(), image_details.width, image_details.height, image_details.channels, image_details.data, stride_bytes);
 }
 
+// Image data and texture handling function LoadTextureFromData() derived from LoadTextureFromMemory()
+// Courtesy of https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples#example-for-opengl-users
 void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details)
 {
     if (*(out_texture) == 0)
@@ -118,8 +109,8 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details)
             glBindTexture(GL_TEXTURE_2D, gl_ImageTexture);
 
             // Setup filtering parameters for display
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
             // Upload pixels into texture
             glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
@@ -131,10 +122,8 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details)
                 case 4:
                     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_details.width, image_details.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_details.data);
                     break;
-
             }
             //stbi_image_free(image_data);
-
             *out_texture = gl_ImageTexture;
         }
     }
@@ -165,6 +154,17 @@ void ImGuiDisplayImage(ImageDetails image_details)
     LoadTextureFromData(&gl_ImageTexture, image_details);
     ImGui::Image((ImTextureID)(intptr_t)gl_ImageTexture, ImVec2(width, height));
     t_ImageData = image_details.data;
+}
+
+void ImguiDisplayLogo()
+{
+    static ImageDetails t_ImageDetails;
+    static GLuint gl_LogoTexture = 0;
+    LoadDataFromArray(crypng_logo, 1192, "logo", t_ImageDetails);
+    LoadTextureFromData(&gl_LogoTexture, t_ImageDetails);
+    stbi_image_free(t_ImageDetails.data);
+    t_ImageDetails.data = NULL;
+    ImGui::Image((ImTextureID)(intptr_t)gl_LogoTexture, ImVec2(384, 120));
 }
 
 void ZeroLSB(ImageDetails image_details)

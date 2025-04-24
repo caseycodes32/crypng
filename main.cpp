@@ -148,6 +148,7 @@ int main(int, char**)
 
         if (m_UIPage == SELECT_FILE)
         {
+            ImguiDisplayLogo();
             if (m_ImageInputPath == "")
             {
                 ImGui::Text("Thanks for using crypng by Kyle Meyer");
