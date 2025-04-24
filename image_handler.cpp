@@ -74,6 +74,17 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
     image_details.data = stbi_load(image_path.c_str(), &image_details.width, &image_details.height, &image_details.channels, 0);
     image_details.name = FilenameFromPath(image_path);
 
+    if (image_details.width > image_details.height)
+    {
+        image_details.normalized_width = 384;
+        image_details.normalized_height = (static_cast<float>(image_details.height) / image_details.width) * 384;
+    }
+    else
+    {
+        image_details.normalized_height = 384;
+        image_details.normalized_width = (static_cast<float>(image_details.width) / image_details.height) * 384;
+    }
+    
     return true;
 }
 
@@ -97,7 +108,7 @@ void SaveDataToFile(std::string output_path, ImageDetails image_details)
 
 // Image data and texture handling function LoadTextureFromData() derived from LoadTextureFromMemory()
 // Courtesy of https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples#example-for-opengl-users
-void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details)
+void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool smooth)
 {
     if (*(out_texture) == 0)
     {
@@ -109,8 +120,16 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details)
             glBindTexture(GL_TEXTURE_2D, gl_ImageTexture);
 
             // Setup filtering parameters for display
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            if (smooth)
+            {
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            }
+            else
+            {
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            }
 
             // Upload pixels into texture
             glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
@@ -133,37 +152,27 @@ void ImGuiDisplayImage(ImageDetails image_details)
 {
     static GLuint gl_ImageTexture = 0;
     static unsigned char *t_ImageData = 0;
-    int width = 200;
-    int height = 200;
-
-    
-    if (image_details.data != t_ImageData) gl_ImageTexture = 0;
-
-    if (image_details.width > image_details.height)
-    {
-        width = 350;
-        height = (static_cast<float>(image_details.height) / image_details.width) * 350;
-    }
-    else
-    {
-        height = 350;
-        width = (static_cast<float>(image_details.width) / image_details.height) * 350;
-    }
 
     //roLSB(image_details);
-    LoadTextureFromData(&gl_ImageTexture, image_details);
-    ImGui::Image((ImTextureID)(intptr_t)gl_ImageTexture, ImVec2(width, height));
+    if (t_ImageData != image_details.data)
+    {
+        gl_ImageTexture = 0;
+        stbi_image_free(t_ImageData);
+    }
+    LoadTextureFromData(&gl_ImageTexture, image_details, true);
+    ImGui::Image((ImTextureID)(intptr_t)gl_ImageTexture, ImVec2(image_details.normalized_width, image_details.normalized_height));
     t_ImageData = image_details.data;
 }
 
-void ImguiDisplayLogo()
+void ImGuiDisplayLogo()
 {
     static ImageDetails t_ImageDetails;
     static GLuint gl_LogoTexture = 0;
     LoadDataFromArray(crypng_logo, 1192, "logo", t_ImageDetails);
-    LoadTextureFromData(&gl_LogoTexture, t_ImageDetails);
+    LoadTextureFromData(&gl_LogoTexture, t_ImageDetails, false);
     stbi_image_free(t_ImageDetails.data);
     t_ImageDetails.data = NULL;
+    ImGui::SetCursorPos(ImVec2(8, 128));
     ImGui::Image((ImTextureID)(intptr_t)gl_LogoTexture, ImVec2(384, 120));
 }
 

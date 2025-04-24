@@ -12,6 +12,8 @@ struct ImageDetails
     std::string name;
     int width;
     int height;
+    int normalized_width;
+    int normalized_height;
     int channels;
 };
 
@@ -21,7 +23,7 @@ bool SaveFileDialog(std::string &file_path, HWND hwnd);
 bool LoadDataFromFile(std::string image_path, ImageDetails &image_details);
 bool LoadDataFromArray(unsigned char* buffer, int buffer_length, std::string name, ImageDetails &image_details);
 void SaveDataToFile(std::string output_path, ImageDetails image_details);
-void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details);
+void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool smooth);
 void ImGuiDisplayImage(ImageDetails image_details);
-void ImguiDisplayLogo();
+void ImGuiDisplayLogo();
 void ZeroLSB(ImageDetails image_details);

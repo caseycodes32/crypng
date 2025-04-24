@@ -81,12 +81,12 @@ int main(int, char**)
 
     // Modify ImGui Style Defaults
     ImGuiStyle& style = ImGui::GetStyle();
-    style.TabRounding = 8.f;
-    style.FrameRounding = 8.f;
-    style.GrabRounding = 8.f;
+    //style.TabRounding = 8.f;
+    style.FrameRounding = 2.f;
+    //style.GrabRounding = 8.f;
     style.WindowRounding = 8.f;
-    style.PopupRounding = 8.f;
-    style.ChildRounding = 8.f;
+    //style.PopupRounding = 8.f;
+    //style.ChildRounding = 8.f;
     style.Colors[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
     style.AntiAliasedLines = false;
     style.AntiAliasedFill = false;
@@ -135,12 +135,11 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        DWORD dwFlag = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove;
+        static DWORD dwFlag = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove;
         static bool open = true;
 
 		if (!open)
 			ExitProcess(0);
-
 
         ImGui::SetNextWindowSize(ImVec2(k_WindowSize.x, k_WindowSize.y));
         ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -148,12 +147,12 @@ int main(int, char**)
 
         if (m_UIPage == SELECT_FILE)
         {
-            ImguiDisplayLogo();
             if (m_ImageInputPath == "")
             {
+                ImGuiDisplayLogo();
                 ImGui::Text("Thanks for using crypng by Kyle Meyer");
                 ImGui::Text("Select a png image to get started:");
-                if (ImGui::Button("Select Image")) 
+                if (ImGui::Button("Select Image", ImVec2(ImGui::GetContentRegionAvail().x, 0.0f)))
                 {
                     OpenFileDialog(m_ImageInputPath, hwnd);
                     m_ImageDetails = ImageDetails{};
