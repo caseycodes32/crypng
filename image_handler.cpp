@@ -172,7 +172,7 @@ void ImGuiDisplayLogo()
     LoadTextureFromData(&gl_LogoTexture, t_ImageDetails, false);
     stbi_image_free(t_ImageDetails.data);
     t_ImageDetails.data = NULL;
-    ImGui::SetCursorPos(ImVec2(8, 128));
+    ImGui::SetCursorPos(ImVec2(8, 148));
     ImGui::Image((ImTextureID)(intptr_t)gl_LogoTexture, ImVec2(384, 120));
 }
 

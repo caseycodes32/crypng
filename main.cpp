@@ -151,24 +151,40 @@ int main(int, char**)
             {
                 ImGuiDisplayLogo();
                 ImGui::Text("Thanks for using crypng by Kyle Meyer");
-                ImGui::Text("Select a png image to get started:");
+                ImGui::Text("Select a PNG image to get started");
                 if (ImGui::Button("Select Image", ImVec2(ImGui::GetContentRegionAvail().x, 0.0f)))
                 {
-                    OpenFileDialog(m_ImageInputPath, hwnd);
                     m_ImageDetails = ImageDetails{};
+                    OpenFileDialog(m_ImageInputPath, hwnd);
                 }
             }
             else
             {
-                ImGui::Text("Image: %s | %dx%d | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
                 LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
                 ImGuiDisplayImage(m_ImageDetails);
-
+                ImGui::Text("%s | %dx%d px | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
+                if (ImGui::Button("Select Another Image"))
+                {
+                    m_ImageDetails = ImageDetails{};
+                    OpenFileDialog(m_ImageInputPath, hwnd);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Encode Message"))
+                {
+                    m_UIPage = HIDE_MESSAGE;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Decode Message"))
+                {
+                    m_UIPage = RETRIEVE_MESSAGE;
+                }
+                /*
                 if (ImGui::Button("Save Image")) 
                 {
                     SaveFileDialog(m_ImageOutputPath, hwnd);
                     SaveDataToFile(m_ImageOutputPath, m_ImageDetails);
                 }
+                    */
             }
         }
         
