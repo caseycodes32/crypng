@@ -49,9 +49,9 @@ bool SaveFileDialog(std::string &file_path, HWND hwnd)
     if (GetSaveFileNameA(&ofn) == TRUE)
     {
         file_path = std::string(c_FilePath);
-        std::filesystem::path p_FilePath(file_path);
 
-        if (p_FilePath.extension().string() != ".png")
+        //size_t t_DotIdx = file_path.find_last_of(".");
+        if (file_path.substr(file_path.length() - 4) != ".png")
             file_path.append(".png");
 
         return true;
