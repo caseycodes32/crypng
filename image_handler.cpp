@@ -73,6 +73,8 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
 {
     if (image_details.data != NULL) return false;
 
+    /*
+
     FILE* f = fopen(image_path.c_str(), "rb");
     if (f == NULL)
         return false;
@@ -90,6 +92,10 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
     image_details.name = FilenameFromPath(image_path);
 
     free(file_data);
+    */
+
+    image_details.data = stbi_load(image_path.c_str(), &image_details.width, &image_details.height, &image_details.channels, 0);
+
     return true;
 }
 
@@ -117,7 +123,16 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details)
 
             // Upload pixels into texture
             glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_details.width, image_details.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_details.data);
+            switch (image_details.channels)
+            {
+                case 3:
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_details.width, image_details.height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_details.data);
+                    break;
+                case 4:
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_details.width, image_details.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_details.data);
+                    break;
+
+            }
             //stbi_image_free(image_data);
 
             *out_texture = gl_ImageTexture;
