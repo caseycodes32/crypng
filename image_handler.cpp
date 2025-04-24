@@ -84,6 +84,8 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
         image_details.normalized_height = 384;
         image_details.normalized_width = (static_cast<float>(image_details.width) / image_details.height) * 384;
     }
+
+    LSBtoMSB(image_details);
     
     return true;
 }
@@ -192,6 +194,28 @@ void ZeroLSB(ImageDetails image_details)
 
             image_details.data[idx + 2] =  image_details.data[idx + 2] >> 1;
             image_details.data[idx + 2] =  image_details.data[idx + 2] << 1;
+            
+        }
+    }
+}
+
+void LSBtoMSB(ImageDetails image_details)
+{
+    for (int y = 0; y < image_details.height; y++)
+    {
+        for (int x = 0; x < image_details.width; x++)
+        {
+            int idx = (y * image_details.width + x) * image_details.channels;
+            
+            image_details.data[idx] =  image_details.data[idx] >> 1;
+            image_details.data[idx] =  image_details.data[idx] << 7;
+            
+            if (image_details.channels > 1)
+            {
+                image_details.data[idx + 1] = 0;
+
+                image_details.data[idx + 2] = 0;
+            }
             
         }
     }

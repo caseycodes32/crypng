@@ -27,3 +27,4 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool s
 void ImGuiDisplayImage(ImageDetails image_details);
 void ImGuiDisplayLogo();
 void ZeroLSB(ImageDetails image_details);
+void LSBtoMSB(ImageDetails image_details);

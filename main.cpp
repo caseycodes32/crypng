@@ -163,18 +163,20 @@ int main(int, char**)
                 LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
                 ImGuiDisplayImage(m_ImageDetails);
                 ImGui::Text("%s | %dx%d px | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
-                if (ImGui::Button("Select Another Image"))
+                ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
+                ImGui::Separator();
+                if (ImGui::Button("Select Another Image", ImVec2(0.0f, 32.0f)))
                 {
                     m_ImageDetails = ImageDetails{};
                     OpenFileDialog(m_ImageInputPath, hwnd);
                 }
-                ImGui::SameLine();
-                if (ImGui::Button("Encode Message"))
+                ImGui::SameLine(0.0f, 16.0f);
+                if (ImGui::Button("Encode Message", ImVec2(0.0f, 32.0f)))
                 {
                     m_UIPage = HIDE_MESSAGE;
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("Decode Message"))
+                if (ImGui::Button("Decode Message", ImVec2(0.0f, 32.0f)))
                 {
                     m_UIPage = RETRIEVE_MESSAGE;
                 }
