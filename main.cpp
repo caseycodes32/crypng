@@ -187,8 +187,12 @@ int main(int, char**)
                     SaveFileDialog(m_ImageOutputPath, hwnd);
                     SaveDataToFile(m_ImageOutputPath, m_ImageDetails);
                 }
-                    */
+                */
             }
+        }
+        else if (m_UIPage == HIDE_MESSAGE)
+        {
+            ImGui::Text(test_aes().c_str());
         }
         
         ImGui::End();
