@@ -9,6 +9,7 @@
 #include <tchar.h>
 
 #include "image_handler.h"
+#include "image_processor.h"
 
 // Data stored per platform window
 struct WGL_WindowData { HDC hDC; };
