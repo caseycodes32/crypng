@@ -35,7 +35,7 @@ void AppendBitToArray(unsigned char *message, size_t index, int bit)
     size_t byte_idx = index / 8;
     size_t bit_idx = index % 8;
 
-    unsigned char byte_mask = 0b00000000 | bit;
+    unsigned char byte_mask = bit;
     byte_mask = byte_mask << bit_idx;
 
     message[byte_idx] = message[byte_idx] | byte_mask;
@@ -68,7 +68,7 @@ std::string DecodeMessageLinear(size_t length, int channel, ImageDetails image_d
 {
     size_t MAX_MESSAGE_BITS = length * 8;
     size_t bit_idx = 0;
-    unsigned char message_buf[length];
+    unsigned char message_buf[length] = "";
 
     for (int y = 0; y < image_details.height; y++)
     {
