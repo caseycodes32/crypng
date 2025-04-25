@@ -210,6 +210,7 @@ std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details)
 
             current_block.var = CalculateBlockVar(current_block);
             block_list.push_back(current_block);
+            free(current_block.block_bits);
         }
     }
     return block_list;
@@ -221,17 +222,37 @@ float CalculateBlockVar(Block block)
     float variance_sum = 0;
     float mean = 0.0f;
 
-    for (int i = 0; i < block.length; i++)
+    int n = block.length;
+    if (block.channels < 4)
     {
-        mean_sum += block.block_bits[i];
-    }
-    mean = mean_sum / block.length;
+        for (int i = 0; i < block.length; i++)
+            mean_sum += block.block_bits[i];
 
-    for (int i = 0; i < block.length; i++)
-    {
-        variance_sum += ((block.block_bits[i] - mean) * (block.block_bits[i] - mean));
+        mean = mean_sum / n;
+        for (int i = 0; i < block.length; i++)
+            variance_sum += ((block.block_bits[i] - mean) * (block.block_bits[i] - mean));
+        
     }
-    return (variance_sum / (block.length - 1));
+    else
+    {
+        n = block.length * 0.75;
+        for (int i = 0; i < block.length; i += 4)
+        {
+            mean_sum += block.block_bits[i];
+            mean_sum += block.block_bits[i + 1];
+            mean_sum += block.block_bits[i + 2];
+        }
+
+        mean = mean_sum / n;
+        for (int i = 0; i < block.length; i += 4)
+        {
+            variance_sum += ((block.block_bits[i] - mean) * (block.block_bits[i] - mean));
+            variance_sum += ((block.block_bits[i + 1] - mean) * (block.block_bits[i + 1] - mean));
+            variance_sum += ((block.block_bits[i + 2] - mean) * (block.block_bits[i + 2] - mean));
+        }
+    }
+
+    return (variance_sum / (n - 1));
 }
 
 float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details)
