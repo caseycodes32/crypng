@@ -249,13 +249,13 @@ int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
 float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
-    unsigned char private_key[AES_BLOCKLEN] = "";
-    unsigned char init_vector[AES_BLOCKLEN] = "";
+    unsigned char private_key[AES_BLOCKLEN];
+    unsigned char init_vector[AES_BLOCKLEN];
     int message_buffer_len = message_length - (message_length % -AES_BLOCKLEN);
     unsigned char *encrypted_message_buffer = new unsigned char[message_buffer_len];
 
     memset(encrypted_message_buffer, 0x00, message_buffer_len);
-    memcpy(encrypted_message_buffer, message, message_length);
+    memcpy(encrypted_message_buffer, message, message_buffer_len);
 
     GenerateRandomKey(private_key, AES_BLOCKLEN);
     GenerateRandomKey(init_vector, AES_BLOCKLEN);
