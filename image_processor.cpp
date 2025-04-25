@@ -218,41 +218,32 @@ std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details)
 
 float CalculateBlockVar(Block block)
 {
-    int mean_sum = 0;
-    float variance_sum = 0;
-    float mean = 0.0f;
+    int n = BLOCK_SIZE * BLOCK_SIZE;
+    int intensity_channels = std::min(block.channels, 3);
 
-    int n = block.length;
-    if (block.channels < 4)
+    int mean[intensity_channels];
+    float variance[intensity_channels];
+
+    for (int c = 0; c < intensity_channels; c++)
     {
-        for (int i = 0; i < block.length; i++)
-            mean_sum += block.block_bits[i];
+        for (int i = c; i < block.length; i += intensity_channels)
+            mean[c] += block.block_bits[i];
 
-        mean = mean_sum / n;
-        for (int i = 0; i < block.length; i++)
-            variance_sum += ((block.block_bits[i] - mean) * (block.block_bits[i] - mean));
+        mean[c] /= n;
+        for (int i = c; i < block.length; i += intensity_channels)
+            variance[c] += ((block.block_bits[i] - mean[c]) * (block.block_bits[i] - mean[c]));
         
+        variance[c] /= (n-1);
     }
-    else
-    {
-        n = block.length * 0.75;
-        for (int i = 0; i < block.length; i += 4)
-        {
-            mean_sum += block.block_bits[i];
-            mean_sum += block.block_bits[i + 1];
-            mean_sum += block.block_bits[i + 2];
-        }
+    
+    float *max_variance = std::max_element(variance, variance + intensity_channels - 1);
+    
+    return *max_variance;
+}
 
-        mean = mean_sum / n;
-        for (int i = 0; i < block.length; i += 4)
-        {
-            variance_sum += ((block.block_bits[i] - mean) * (block.block_bits[i] - mean));
-            variance_sum += ((block.block_bits[i + 1] - mean) * (block.block_bits[i + 1] - mean));
-            variance_sum += ((block.block_bits[i + 2] - mean) * (block.block_bits[i + 2] - mean));
-        }
-    }
-
-    return (variance_sum / (n - 1));
+int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
+{
+    return 0;
 }
 
 float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details)

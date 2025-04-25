@@ -166,8 +166,8 @@ int main(int, char**)
             {
                 LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
 
-                TestEncode(m_ImageDetails);
-                ImGui::Text("Decoded msg: %s", TestDecode(m_ImageDetails).c_str());
+                //TestEncode(m_ImageDetails);
+                //ImGui::Text("Decoded msg: %s", TestDecode(m_ImageDetails).c_str());
 
                 ImGuiDisplayImage(m_ImageDetails);
                 ImGui::Text("%s | %dx%d px | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
