@@ -151,6 +151,19 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool s
     }
 }
 
+void CopyImageInMemory(ImageDetails id_current, ImageDetails &id_new)
+{
+    id_new.channels = id_current.channels;
+    id_new.width = id_current.width;
+    id_new.height = id_current.height;
+    id_new.normalized_width = id_current.normalized_width;
+    id_new.normalized_height = id_current.normalized_height;
+    id_new.name = id_current.name;
+
+    size_t s_ImageSize = (id_current.width * id_current.height * id_current.channels);
+    memcpy(id_new.data, id_current.data, s_ImageSize);
+}
+
 void ImGuiDisplayImage(ImageDetails image_details)
 {
     static GLuint gl_ImageTexture = 0;

@@ -23,6 +23,7 @@ bool SaveFileDialog(std::string &file_path, HWND hwnd);
 bool LoadDataFromFile(std::string image_path, ImageDetails &image_details);
 bool LoadDataFromArray(unsigned char* buffer, int buffer_length, std::string name, ImageDetails &image_details);
 void SaveDataToFile(std::string output_path, ImageDetails image_details);
+void CopyImageInMemory(ImageDetails id_current, ImageDetails &id_new);
 void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool smooth);
 void ImGuiDisplayImage(ImageDetails image_details);
 void ImGuiDisplayLogo();
