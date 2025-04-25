@@ -43,5 +43,6 @@ void PopulateBitArraysAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image
 
 std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details);
 void CalculateBlockVar(Block &block);
-
+int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
+void QuicksortBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details);

@@ -243,7 +243,33 @@ void CalculateBlockVar(Block &block)
 
 int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
 {
-    return 0;
+    float pivot = vec_blocks.at(idx_high).var;
+    
+    int i = (idx_low - 1);
+
+    for (int j = idx_low; j <= idx_high - 1; j++)
+    {
+        if (vec_blocks.at(j).var <= pivot)
+        {
+            i++;
+            std::swap(vec_blocks[i], vec_blocks[j]);
+        }
+    }
+
+    std::swap(vec_blocks[i + 1], vec_blocks[idx_high]);
+    
+    return (i + 1);
+}
+
+void QuicksortBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
+{
+    if (idx_low < idx_high)
+    {
+        int partition_idx = PartitionBlocks(vec_blocks, idx_low, idx_high);
+
+        QuicksortBlocks(vec_blocks, idx_low, partition_idx - 1);
+        QuicksortBlocks(vec_blocks, partition_idx + 1, idx_high);
+    }
 }
 
 float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details)
@@ -273,6 +299,7 @@ float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_leng
 
     std::vector<Block> second_bit_blocks = CreateBlockList(second_bits, image_details);
     delete(second_bits);
+    QuicksortBlocks(second_bit_blocks, 0, second_bit_blocks.size() - 1);
 
-    return second_bit_blocks.at(0).var;
+    return second_bit_blocks.at(second_bit_blocks.size() - 1).var;
 }
