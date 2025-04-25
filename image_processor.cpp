@@ -21,3 +21,128 @@ std::string test_aes()
 
     return std::string(reinterpret_cast<char*>(text), 64);
 }
+
+bool GetBitFromArray(unsigned char *message, size_t index)
+{
+    size_t byte_idx = index / 8;
+    size_t bit_idx = index % 8;
+
+    return (message[byte_idx] >> bit_idx) & 1;
+}
+
+void AppendBitToArray(unsigned char *message, size_t index, int bit)
+{
+    size_t byte_idx = index / 8;
+    size_t bit_idx = index % 8;
+
+    unsigned char byte_mask = 0b00000000 | bit;
+    byte_mask = byte_mask << bit_idx;
+
+    message[byte_idx] = message[byte_idx] | byte_mask;
+}
+
+void EncodeMessageLinear(unsigned char *message, size_t length, int channel, ImageDetails image_details)
+{
+    size_t MAX_MESSAGE_BITS = length * 8;
+    size_t bit_idx = 0;
+
+    for (int y = 0; y < image_details.height; y++)
+    {
+        for (int x = 0; x < image_details.width; x++)
+        {
+            int image_byte_idx = (y * image_details.width + x) * image_details.channels;
+            
+            image_details.data[image_byte_idx + channel] =  image_details.data[image_byte_idx + channel] >> 1;
+            image_details.data[image_byte_idx + channel] =  image_details.data[image_byte_idx + channel] << 1;
+
+            if (bit_idx < MAX_MESSAGE_BITS)
+            {
+                image_details.data[image_byte_idx + channel] = (image_details.data[image_byte_idx + channel] | BYTE_VAL[GetBitFromArray(message, bit_idx)]);
+                bit_idx += 1;
+            }
+        }
+    }
+}
+
+std::string DecodeMessageLinear(size_t length, int channel, ImageDetails image_details)
+{
+    size_t MAX_MESSAGE_BITS = length * 8;
+    size_t bit_idx = 0;
+    unsigned char message_buf[length];
+
+    for (int y = 0; y < image_details.height; y++)
+    {
+        for (int x = 0; x < image_details.width; x++)
+        {
+            int image_byte_idx = (y * image_details.width + x) * image_details.channels;
+
+            if (bit_idx < MAX_MESSAGE_BITS)
+            {
+                AppendBitToArray(message_buf, bit_idx, (image_details.data[image_byte_idx + channel] & 1));
+                bit_idx += 1;
+            }
+        }
+    }
+
+    return std::string(reinterpret_cast<char*>(message_buf), 64);
+}
+
+void TestEncode(ImageDetails image_details)
+{
+    unsigned char text[]  = {0x68, 0x65, 0x68, 0x65, 0x20, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x20,
+        0x74, 0x65, 0x78, 0x74, 0x20, 0x6E, 0x79, 0x61, 0x20, 0x3A, 0x33, 0x20,
+        0x6F, 0x6B, 0x20, 0x6D, 0x61, 0x6B, 0x65, 0x20, 0x74, 0x68, 0x69, 0x73,
+        0x20, 0x61, 0x20, 0x6C, 0x69, 0x74, 0x74, 0x6C, 0x65, 0x20, 0x6C, 0x6F,
+        0x6E, 0x67, 0x65, 0x72, 0x20, 0x61, 0x6E, 0x64, 0x20, 0x64, 0x69, 0x76,
+        0x69, 0x73, 0x69, 0x62};
+
+    EncodeMessageLinear(text, 64, 0, image_details);
+}
+
+std::string TestDecode(ImageDetails image_details)
+{
+    std::string decoded_message = DecodeMessageLinear(64, 0, image_details);
+
+    return decoded_message;
+}
+
+void ZeroLSB(ImageDetails image_details)
+{
+    for (int y = 0; y < image_details.height; y++)
+    {
+        for (int x = 0; x < image_details.width; x++)
+        {
+            int idx = (y * image_details.width + x) * 4;
+            
+            image_details.data[idx] =  image_details.data[idx] >> 1;
+            image_details.data[idx] =  image_details.data[idx] << 1;
+            
+            image_details.data[idx + 1] =  image_details.data[idx + 1] >> 1;
+            image_details.data[idx + 1] =  image_details.data[idx + 1] << 1;
+
+            image_details.data[idx + 2] =  image_details.data[idx + 2] >> 1;
+            image_details.data[idx + 2] =  image_details.data[idx + 2] << 1;
+        }
+    }
+}
+
+void LSBtoMSB(ImageDetails image_details)
+{
+    for (int y = 0; y < image_details.height; y++)
+    {
+        for (int x = 0; x < image_details.width; x++)
+        {
+            int idx = (y * image_details.width + x) * image_details.channels;
+            
+            image_details.data[idx] =  image_details.data[idx] >> 1;
+            image_details.data[idx] =  image_details.data[idx] << 7;
+            
+            if (image_details.channels > 1)
+            {
+                image_details.data[idx + 1] = 0;
+
+                image_details.data[idx + 2] = 0;
+            }
+        }
+    }
+}

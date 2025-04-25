@@ -26,5 +26,3 @@ void SaveDataToFile(std::string output_path, ImageDetails image_details);
 void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool smooth);
 void ImGuiDisplayImage(ImageDetails image_details);
 void ImGuiDisplayLogo();
-void ZeroLSB(ImageDetails image_details);
-void LSBtoMSB(ImageDetails image_details);

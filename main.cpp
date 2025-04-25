@@ -162,6 +162,10 @@ int main(int, char**)
             else
             {
                 LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
+
+                TestEncode(m_ImageDetails);
+                ImGui::Text("Decoded msg: %s", TestDecode(m_ImageDetails).c_str());
+
                 ImGuiDisplayImage(m_ImageDetails);
                 ImGui::Text("%s | %dx%d px | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
                 ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
@@ -193,6 +197,10 @@ int main(int, char**)
         else if (m_UIPage == HIDE_MESSAGE)
         {
             ImGui::Text(test_aes().c_str());
+        }
+        else if (m_UIPage == RETRIEVE_MESSAGE)
+        {
+
         }
         
         ImGui::End();
