@@ -84,8 +84,6 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
         image_details.normalized_height = 384;
         image_details.normalized_width = (static_cast<float>(image_details.width) / image_details.height) * 384;
     }
-
-    //LSBtoMSB(image_details);
     
     return true;
 }
@@ -134,10 +132,13 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool s
             }
 
             // Upload pixels into texture
-            glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
             switch (image_details.channels)
             {
+                case 1:
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, image_details.width, image_details.height, 0, GL_RED, GL_UNSIGNED_BYTE, image_details.data);
+                    break;
                 case 3:
                     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_details.width, image_details.height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_details.data);
                     break;
@@ -145,8 +146,10 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool s
                     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_details.width, image_details.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_details.data);
                     break;
             }
-            //stbi_image_free(image_data);
+
+            //stbi_image_free(image_details.data);
             *out_texture = gl_ImageTexture;
+            return;
         }
     }
 }
