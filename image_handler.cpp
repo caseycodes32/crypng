@@ -147,7 +147,6 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool s
                     break;
             }
 
-            //stbi_image_free(image_details.data);
             *out_texture = gl_ImageTexture;
             return;
         }

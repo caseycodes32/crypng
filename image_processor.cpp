@@ -241,6 +241,7 @@ void CalculateBlockVar(Block &block)
     block.max_var_channel = std::distance(variance, max_variance);
 }
 
+// Quicksort functions PartitionBlocks() and QuicksortBlocks() derived from https://www.geeksforgeeks.org/cpp-program-for-quicksort/
 int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
 {
     float pivot = vec_blocks.at(idx_high).var;
