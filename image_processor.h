@@ -5,6 +5,7 @@
 
 #include <random>
 #include <ctime>
+#include <cmath>
 #include <algorithm>
 #include "aes.h"
 #include "image_handler.h"
@@ -42,4 +43,4 @@ void PopulateBitArraysAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image
 std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details);
 float CalculateBlockVar(Block block);
 
-int PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details);
+float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details);

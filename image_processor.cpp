@@ -219,21 +219,22 @@ float CalculateBlockVar(Block block)
 {
     int mean_total = 0;
     float mean = 0.0f;
+
     for (int i = 0; i < block.length; i++)
     {
         mean_total += block.block_bits[i];
     }
     mean = mean_total / block.length;
 
-    int variance = 0;
+    float variance = 0;
     for (int i = 0; i < block.length; i++)
     {
-        variance += (block.block_bits[i] - mean) * 2.0f;
+        variance += ((block.block_bits[i] - mean) * (block.block_bits[i] - mean));
     }
-    return variance;
+    return (variance / (block.length - 1));
 }
 
-int PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details)
+float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
     unsigned char private_key[AES_BLOCKLEN] = "";
@@ -260,5 +261,5 @@ int PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length
 
     std::vector<Block> second_bit_blocks = CreateBlockList(second_bits, image_details);
 
-    return second_bit_blocks.size();
+    return second_bit_blocks.at(0).var;
 }
