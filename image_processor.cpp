@@ -221,16 +221,16 @@ void CalculateBlockVar(Block &block)
     int n = BLOCK_SIZE * BLOCK_SIZE;
     int intensity_channels = std::min((int)block.channels, 3);
 
-    int mean[intensity_channels];
+    float mean[intensity_channels];
     float variance[intensity_channels];
 
     for (int c = 0; c < intensity_channels; c++)
     {
-        for (int i = c; i < block.length; i += intensity_channels)
+        for (int i = c; i < block.length; i += block.channels)
             mean[c] += block.block_bits[i];
 
         mean[c] /= n;
-        for (int i = c; i < block.length; i += intensity_channels)
+        for (int i = c; i < block.length; i += block.channels)
             variance[c] += ((block.block_bits[i] - mean[c]) * (block.block_bits[i] - mean[c]));
         
         variance[c] /= (n - 1);
