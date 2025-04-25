@@ -20,9 +20,10 @@ struct Block
     bool *block_bits;
     int loc_x;
     int loc_y;
-    int channels;
+    uint8_t channels;
     int length;
     float var;
+    uint8_t max_var_channel;
 };
 
 std::string test_aes();
@@ -41,6 +42,6 @@ void LSBtoMSB(ImageDetails image_details);
 void PopulateBitArraysAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image_details);
 
 std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details);
-float CalculateBlockVar(Block block);
+void CalculateBlockVar(Block &block);
 
 float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details);

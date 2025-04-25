@@ -208,7 +208,7 @@ std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details)
             for (int i = 0; i < BLOCK_SIZE; i++)
                 memcpy(current_block.block_bits + (i * block_width), bits + (((y + i) * image_details.width + x) * image_details.channels), block_width);
 
-            current_block.var = CalculateBlockVar(current_block);
+            CalculateBlockVar(current_block);
             block_list.push_back(current_block);
             delete(current_block.block_bits);
         }
@@ -216,10 +216,10 @@ std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details)
     return block_list;
 }
 
-float CalculateBlockVar(Block block)
+void CalculateBlockVar(Block &block)
 {
     int n = BLOCK_SIZE * BLOCK_SIZE;
-    int intensity_channels = std::min(block.channels, 3);
+    int intensity_channels = std::min((int)block.channels, 3);
 
     int mean[intensity_channels];
     float variance[intensity_channels];
@@ -233,12 +233,12 @@ float CalculateBlockVar(Block block)
         for (int i = c; i < block.length; i += intensity_channels)
             variance[c] += ((block.block_bits[i] - mean[c]) * (block.block_bits[i] - mean[c]));
         
-        variance[c] /= (n-1);
+        variance[c] /= (n - 1);
     }
     
     float *max_variance = std::max_element(variance, variance + intensity_channels - 1);
-    
-    return *max_variance;
+    block.var = *max_variance;
+    block.max_var_channel = std::distance(variance, max_variance);
 }
 
 int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
