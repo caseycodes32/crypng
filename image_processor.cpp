@@ -210,7 +210,7 @@ std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details)
 
             current_block.var = CalculateBlockVar(current_block);
             block_list.push_back(current_block);
-            free(current_block.block_bits);
+            delete(current_block.block_bits);
         }
     }
     return block_list;
@@ -281,6 +281,7 @@ float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_leng
     PopulateBitArraysAndZeroLSB(first_bits, second_bits, image_details);
 
     std::vector<Block> second_bit_blocks = CreateBlockList(second_bits, image_details);
+    delete(second_bits);
 
     return second_bit_blocks.at(0).var;
 }
