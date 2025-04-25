@@ -108,6 +108,9 @@ int main(int, char**)
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(1.0f, 0.0f, 0.0f, 1.00f);
 
+    // Program specific initializations
+    InitializeRandomSeed();
+
     // Main loop
     bool done = false;
 

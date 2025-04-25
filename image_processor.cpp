@@ -22,6 +22,19 @@ std::string test_aes()
     return std::string(reinterpret_cast<char*>(text), 64);
 }
 
+void InitializeRandomSeed()
+{
+    std::srand(std::time(0));
+}
+
+void GenerateRandomKey(unsigned char *key, size_t length)
+{
+    for (int i = 0; i < length; i++)
+    {
+        key[i] = std::rand() % 0xFF;
+    }
+}
+
 bool GetBitFromArray(unsigned char *message, size_t index)
 {
     size_t byte_idx = index / 8;
