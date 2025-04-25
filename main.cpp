@@ -199,7 +199,14 @@ int main(int, char**)
         }
         else if (m_UIPage == HIDE_MESSAGE)
         {
-            ImGui::Text(test_aes().c_str());
+            //ImGui::Text(test_aes().c_str());
+            
+            unsigned char private_key[16] = {0x00};
+            char text[60] = "this is a test message which only is to be used for testing";
+            int key_length = 0;
+            static int blocks = 0;
+            if (blocks == 0) blocks = PerformEncryptionPipeline(text, private_key, key_length, 60, m_ImageDetails);
+            ImGui::Text("blocks: %d", blocks);
         }
         else if (m_UIPage == RETRIEVE_MESSAGE)
         {

@@ -30,9 +30,12 @@ void InitializeRandomSeed()
 void GenerateRandomKey(unsigned char *key, size_t length)
 {
     for (int i = 0; i < length; i++)
-    {
         key[i] = std::rand() % 0xFF;
-    }
+}
+
+bool GetNthBitFromByte(unsigned char byte, int n)
+{
+    return (byte >> n) & 1;
 }
 
 bool GetBitFromArray(unsigned char *message, size_t index)
@@ -40,7 +43,7 @@ bool GetBitFromArray(unsigned char *message, size_t index)
     size_t byte_idx = index / 8;
     size_t bit_idx = index % 8;
 
-    return (message[byte_idx] >> bit_idx) & 1;
+    return GetNthBitFromByte(message[byte_idx], bit_idx);
 }
 
 void AppendBitToArray(unsigned char *message, size_t index, int bit)
@@ -153,9 +156,109 @@ void LSBtoMSB(ImageDetails image_details)
             if (image_details.channels > 1)
             {
                 image_details.data[idx + 1] = 0;
-
                 image_details.data[idx + 2] = 0;
             }
         }
     }
+}
+
+void PopulateBitArraysAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image_details)
+{
+    //int intensity_channels = std::min(image_details.channels, 3);
+
+    for (int y = 0; y < image_details.height; y++)
+    {
+        for (int x = 0; x < image_details.width; x++)
+        {
+            int idx = (y * image_details.width + x) * image_details.channels;
+            
+            for (int c = 0; c < image_details.channels; c++)
+            {
+                lsb[idx + c] = GetNthBitFromByte(image_details.data[idx + c], 0);
+                second_lsb[idx + c] = GetNthBitFromByte(image_details.data[idx + c], 1);
+
+                if (c != 3)
+                {
+                    image_details.data[idx + c] = image_details.data[idx + c] >> 1;
+                    image_details.data[idx + c] = image_details.data[idx + c] << 1;
+                }
+            }
+        }
+    }
+}
+
+std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details)
+{
+    std::vector<Block> block_list;
+
+    int block_width = BLOCK_SIZE * image_details.channels;
+    int block_bytes = block_width * BLOCK_SIZE;
+
+    for (int y = 0; y < image_details.height - BLOCK_SIZE; y += BLOCK_SIZE)
+    {
+        for (int x = 0; x < image_details.width - BLOCK_SIZE; x += BLOCK_SIZE)
+        {
+            Block current_block;
+            current_block.loc_x = x;
+            current_block.loc_y = y;
+            current_block.channels = image_details.channels;
+            current_block.length = block_bytes;
+            current_block.block_bits = new bool[block_bytes];
+
+            for (int i = 0; i < BLOCK_SIZE; i++)
+                memcpy(current_block.block_bits + (i * block_width), bits + (((y + i) * image_details.width + x) * image_details.channels), block_width);
+
+            current_block.var = CalculateBlockVar(current_block);
+            block_list.push_back(current_block);
+        }
+    }
+    return block_list;
+}
+
+float CalculateBlockVar(Block block)
+{
+    int mean_total = 0;
+    float mean = 0.0f;
+    for (int i = 0; i < block.length; i++)
+    {
+        mean_total += block.block_bits[i];
+    }
+    mean = mean_total / block.length;
+
+    int variance = 0;
+    for (int i = 0; i < block.length; i++)
+    {
+        variance += (block.block_bits[i] - mean) * 2.0f;
+    }
+    return variance;
+}
+
+int PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details)
+{
+    struct AES_ctx ctx;
+    unsigned char private_key[AES_BLOCKLEN] = "";
+    unsigned char init_vector[AES_BLOCKLEN] = "";
+    int message_buffer_len = message_length - (message_length % -AES_BLOCKLEN);
+    unsigned char *encrypted_message_buffer = new unsigned char[message_buffer_len];
+
+    memset(encrypted_message_buffer, 0x00, message_buffer_len);
+    memcpy(encrypted_message_buffer, message, message_length);
+
+    GenerateRandomKey(private_key, AES_BLOCKLEN);
+    GenerateRandomKey(init_vector, AES_BLOCKLEN);
+    key = private_key;
+    key_length = AES_BLOCKLEN;
+
+    AES_init_ctx_iv(&ctx, private_key, init_vector);
+    AES_CBC_encrypt_buffer(&ctx, encrypted_message_buffer, message_buffer_len);
+    
+    int bit_array_len = image_details.width * image_details.height * image_details.channels;
+    bool *first_bits = new bool[bit_array_len];
+    bool *second_bits = new bool[bit_array_len];
+
+    PopulateBitArraysAndZeroLSB(first_bits, second_bits, image_details);
+
+    std::vector<Block> second_bit_blocks = CreateBlockList(second_bits, image_details);
+
+    return second_bit_blocks.size();
 }
