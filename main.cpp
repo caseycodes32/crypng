@@ -240,6 +240,8 @@ int main(int, char**)
         else if (m_UIPage == RETRIEVE_MESSAGE)
         {
             static unsigned char private_key[16];
+
+            ImGui::Text("Enter the key phrase:");
             ImGuiInputKeyPhrase(private_key, 16);
 
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
