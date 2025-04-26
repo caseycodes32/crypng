@@ -54,9 +54,8 @@ void ImGuiInputKeyPhrase(unsigned char* key, int key_length)
             }
         }
         if (key_iterator == 15)
-        {
             memcpy(key, possible_key, 16);
-        }
+        else error_invalid_keyphrase = true;
     }
     if (error_invalid_keyphrase) ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Error - Invalid Keyphrase Entered");
 

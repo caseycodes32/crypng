@@ -241,6 +241,14 @@ int main(int, char**)
         {
             static unsigned char private_key[16];
             ImGuiInputKeyPhrase(private_key, 16);
+
+            ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
+            ImGui::Separator();
+            if (ImGui::Button("Back", ImVec2(0.0f, 32.0f)))
+            {
+                m_ImageDetails = ImageDetails{};
+                m_UIPage = SELECT_FILE;
+            }
         }
         
         ImGui::End();
