@@ -210,8 +210,10 @@ int main(int, char**)
             ImGuiDisplayImage(m_ImageDetails);
             */
             static char message_buf[65536];
-            unsigned char private_key[16] = {0x00};
-            int key_length = 0;
+            static unsigned char private_key[16];
+            static std::string str_key = "";
+
+            static int it = 0;
 
             ImGui::Text("Enter a message to hide:");
             ImGui::InputTextMultiline("##Secret Text", message_buf, m_ImageDetails.max_chars, ImVec2(ImGui::GetContentRegionAvail().x, 0.0f));
@@ -219,8 +221,11 @@ int main(int, char**)
 
             if (ImGui::Button("Encode"))
             {
-                PerformEncryptionPipeline(message_buf, private_key, key_length, strlen(message_buf), m_ImageDetails);
+                it = PerformEncryptionPipeline(message_buf, private_key, 16, strlen(message_buf), m_ImageDetails);
+                str_key = std::string(reinterpret_cast<char*>(private_key), 16);
             }
+            ImGui::Text("Key: %d", static_cast<int>(private_key[0]));
+            ImGui::Text("Iter: %d", it);
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
             ImGui::Separator();
             if (ImGui::Button("Back", ImVec2(0.0f, 32.0f)))

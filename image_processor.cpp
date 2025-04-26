@@ -30,7 +30,7 @@ void InitializeRandomSeed()
 void GenerateRandomKey(unsigned char *key, size_t length)
 {
     for (int i = 0; i < length; i++)
-        key[i] = std::rand() % 0xFF;
+        key[i] = std::rand() % (0xFF + 1);
 }
 
 bool GenerateRandomBit(float prob)
@@ -305,11 +305,23 @@ void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int messa
     }
 }
 
-float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details)
+std::size_t HashMemory(unsigned char *data, int length)
+{
+    size_t hash_value = 0;
+    for (int i = 0; i < length; i++)
+    {
+        std::bitset<8> bit_i = data[i];
+        std::hash<std::bitset<8>> bitset_hash;
+        hash_value = hash_value ^ bitset_hash(bit_i);
+    }
+    return hash_value;
+}
+
+int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key_length, int message_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
-    unsigned char private_key[AES_BLOCKLEN];
-    unsigned char init_vector[AES_BLOCKLEN];
+    //unsigned char private_key[key_length];
+    unsigned char init_vector[key_length];
 
     int message_buffer_len = message_length;
     if (message_buffer_len % AES_BLOCKLEN)
@@ -320,10 +332,18 @@ float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_leng
     memset(encrypted_message_buffer, 0x00, message_buffer_len);
     memcpy(encrypted_message_buffer, message, message_buffer_len);
 
-    GenerateRandomKey(private_key, AES_BLOCKLEN);
-    GenerateRandomKey(init_vector, AES_BLOCKLEN);
-    key = private_key;
-    key_length = AES_BLOCKLEN;
+    GenerateRandomKey(init_vector, key_length);
+
+    size_t iterations = 0;
+    while (true)
+    {
+        iterations++;
+        GenerateRandomKey(private_key, key_length);
+        size_t private_key_hash = HashMemory(private_key, key_length);
+
+        long long x = (private_key_hash % 16384) - message_buffer_len; // 65536 (max message buf) / 4
+        if (x <= 4 && x >= 0) break;
+    }
 
     AES_init_ctx_iv(&ctx, private_key, init_vector);
     AES_CBC_encrypt_buffer(&ctx, encrypted_message_buffer, message_buffer_len);
@@ -343,5 +363,5 @@ float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_leng
 
     //LSBtoMSB(image_details);
 
-    return message_buffer_len;
+    return iterations;
 }

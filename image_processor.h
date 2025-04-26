@@ -6,7 +6,9 @@
 #include <random>
 #include <ctime>
 #include <cmath>
+#include <limits>
 #include <algorithm>
+#include <bitset>
 #include "aes.h"
 #include "image_handler.h"
 
@@ -48,4 +50,5 @@ void CalculateBlockVar(Block &block);
 int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 void QuicksortBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details);
-float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details);
+std::size_t HashMemory(unsigned char *data, int length);
+int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key_length, int message_length, ImageDetails image_details);
