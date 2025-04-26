@@ -156,7 +156,7 @@ int main(int, char**)
                 ImGuiDisplayLogo();
                 ImGui::Text("Thanks for using crypng by Kyle Meyer");
                 ImGui::Text("Select a PNG image to get started");
-                if (ImGui::Button("Select Image", ImVec2(ImGui::GetContentRegionAvail().x, 0.0f)))
+                if (ImGui::Button("Select Image", ImVec2(ImGui::GetContentRegionAvail().x, 32.0f)))
                 {
                     m_ImageDetails = ImageDetails{};
                     OpenFileDialog(m_ImageInputPath, hwnd);
@@ -169,7 +169,7 @@ int main(int, char**)
                 //TestEncode(m_ImageDetails);
                 //ImGui::Text("Decoded msg: %s", TestDecode(m_ImageDetails).c_str());
 
-                //ImGuiDisplayImage(m_ImageDetails);
+                ImGuiDisplayImage(m_ImageDetails);
                 ImGui::Text("%s | %dx%d px | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
                 ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
                 ImGui::Separator();
@@ -200,7 +200,7 @@ int main(int, char**)
         else if (m_UIPage == HIDE_MESSAGE)
         {
             //ImGui::Text(test_aes().c_str());
-            
+            /*
             unsigned char private_key[16] = {0x00};
             char text[60] = "this is a test message which only is to be used for testing";
             int key_length = 0;
@@ -208,6 +208,26 @@ int main(int, char**)
             if (blocks == 0) blocks = PerformEncryptionPipeline(text, private_key, key_length, sizeof(text), m_ImageDetails);
             ImGui::Text("blocks: %f", blocks);
             ImGuiDisplayImage(m_ImageDetails);
+            */
+            static char message_buf[65536];
+            unsigned char private_key[16] = {0x00};
+            int key_length = 0;
+
+            ImGui::Text("Enter a message to hide:");
+            ImGui::InputTextMultiline("##Secret Text", message_buf, m_ImageDetails.max_chars, ImVec2(ImGui::GetContentRegionAvail().x, 0.0f));
+            ImGui::Text("Characters Remaining: %d", (m_ImageDetails.max_chars - strlen(message_buf)));
+
+            if (ImGui::Button("Encode"))
+            {
+                PerformEncryptionPipeline(message_buf, private_key, key_length, strlen(message_buf), m_ImageDetails);
+            }
+            ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
+            ImGui::Separator();
+            if (ImGui::Button("Back", ImVec2(0.0f, 32.0f)))
+            {
+                m_ImageDetails = ImageDetails{};
+                m_UIPage = SELECT_FILE;
+            }
         }
         else if (m_UIPage == RETRIEVE_MESSAGE)
         {

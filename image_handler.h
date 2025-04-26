@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <GL/gl.h>
 #include "imgui.h"
 
@@ -15,6 +16,7 @@ struct ImageDetails
     int normalized_width;
     int normalized_height;
     int channels;
+    size_t max_chars;
 };
 
 std::string FilenameFromPath(std::string path);
@@ -25,5 +27,6 @@ bool LoadDataFromArray(unsigned char* buffer, int buffer_length, std::string nam
 void SaveDataToFile(std::string output_path, ImageDetails image_details);
 void CopyImageInMemory(ImageDetails id_current, ImageDetails &id_new);
 void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool smooth);
+size_t GetMaximumCharactersFromImage(ImageDetails image_details);
 void ImGuiDisplayImage(ImageDetails image_details);
 void ImGuiDisplayLogo();

@@ -33,6 +33,13 @@ void GenerateRandomKey(unsigned char *key, size_t length)
         key[i] = std::rand() % 0xFF;
 }
 
+bool GenerateRandomBit(float prob)
+{
+    int rand = std::rand() % 100;
+
+    return (rand < (prob * 100));
+}
+
 bool GetNthBitFromByte(unsigned char byte, int n)
 {
     return (byte >> n) & 1;
@@ -169,13 +176,13 @@ void PopulateBitArraysAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image
             
             for (int c = 0; c < image_details.channels; c++)
             {
-                lsb[idx + c] = GetNthBitFromByte(image_details.data[idx + c], 0);
+                //lsb[idx + c] = GetNthBitFromByte(image_details.data[idx + c], 0);
                 second_lsb[idx + c] = GetNthBitFromByte(image_details.data[idx + c], 1);
 
                 if (c != 3)
                 {
-                    image_details.data[idx + c] = image_details.data[idx + c] >> 1;
-                    image_details.data[idx + c] = image_details.data[idx + c] << 1;
+                    //image_details.data[idx + c] = image_details.data[idx + c] >> 1;
+                    //image_details.data[idx + c] = image_details.data[idx + c] << 1;
                 }
             }
         }
@@ -225,6 +232,8 @@ void CalculateBlockVar(Block &block)
             mean[c] += block.block_bits[i];
 
         mean[c] /= n;
+        block.mean = mean;
+
         for (int i = c; i < block.length; i += block.channels)
             variance[c] += ((block.block_bits[i] - mean[c]) * (block.block_bits[i] - mean[c]));
         
@@ -270,32 +279,28 @@ void QuicksortBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
 
 void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details)
 {
-    size_t message_buf_iterator_byte = 0;
     size_t message_buf_iterator_bit = 0;
-
-    int block_bytes = (BLOCK_SIZE * BLOCK_SIZE) / sizeof(unsigned char);
 
     for (int i = vec_blocks.size() - 1; i >= 0; i--)
     {   
-        //int image_byte_loc = ((vec_blocks.at(i).loc_y * image_details.width + vec_blocks.at(i).loc_x)) * image_details.channels;
-        //image_details.data[image_byte_loc] = image_details.data[image_byte_loc] | 1;
-        
         for (int by = 0;  by < BLOCK_SIZE; by++)
         {
             for (int bx = 0;  bx < BLOCK_SIZE; bx++)
             {
-                if (message_buf_iterator_byte == message_length) return;
-                int image_byte_loc = (((vec_blocks.at(i).loc_y + by) * image_details.width) + vec_blocks.at(i).loc_x + bx) * image_details.channels;
+                if ((message_buf_iterator_bit / 8) < message_length)
+                {
+                    int image_byte_loc = (((vec_blocks.at(i).loc_y + by) * image_details.width) + vec_blocks.at(i).loc_x + bx) * image_details.channels;
 
-                //unsigned char *image_cur_byte = &image_details.data[image_byte_loc];
-                bool bit_mask = GetNthBitFromByte(message_buffer[message_buf_iterator_byte], message_buf_iterator_bit % 8);
+                    bool bit_mask = GetNthBitFromByte(message_buffer[message_buf_iterator_bit / 8], message_buf_iterator_bit % 8);
 
-                //*image_cur_byte = (*image_cur_byte & bit_mask);
-                image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] | bit_mask;
+                    image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] >> 1;
+                    image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] << 1;
+                    image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] | bit_mask;
 
-                message_buf_iterator_bit++;
+                    message_buf_iterator_bit++;
+                }
+                else return;
             }
-            message_buf_iterator_byte++;
         }
     }
 }
@@ -324,7 +329,7 @@ float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_leng
     AES_CBC_encrypt_buffer(&ctx, encrypted_message_buffer, message_buffer_len);
     
     int bit_array_len = image_details.width * image_details.height * image_details.channels;
-    bool *first_bits = new bool[bit_array_len];
+    bool *first_bits = new bool[1];
     bool *second_bits = new bool[bit_array_len];
 
     PopulateBitArraysAndZeroLSB(first_bits, second_bits, image_details);
@@ -336,7 +341,7 @@ float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_leng
 
     WriteMessageToHighVarianceBlockLSB(encrypted_message_buffer, message_buffer_len, second_bit_blocks, image_details);
 
-    LSBtoMSB(image_details);
+    //LSBtoMSB(image_details);
 
     return message_buffer_len;
 }

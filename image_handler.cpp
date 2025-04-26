@@ -84,6 +84,8 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
         image_details.normalized_height = 384;
         image_details.normalized_width = (static_cast<float>(image_details.width) / image_details.height) * 384;
     }
+
+    image_details.max_chars = std::min(GetMaximumCharactersFromImage(image_details), size_t(25536));
     
     return true;
 }
@@ -164,6 +166,13 @@ void CopyImageInMemory(ImageDetails id_current, ImageDetails &id_new)
 
     size_t s_ImageSize = (id_current.width * id_current.height * id_current.channels);
     memcpy(id_new.data, id_current.data, s_ImageSize);
+}
+
+size_t GetMaximumCharactersFromImage(ImageDetails image_details)
+{
+    size_t blocks = (image_details.width / 8) * (image_details.height / 8);
+    size_t max_bytes = blocks * 8;
+    return max_bytes;
 }
 
 void ImGuiDisplayImage(ImageDetails image_details)

@@ -24,11 +24,13 @@ struct Block
     int length;
     float var;
     uint8_t max_var_channel;
+    float *mean;
 };
 
 std::string test_aes();
 void InitializeRandomSeed();
 void GenerateRandomKey(unsigned char *key, size_t length);
+bool GenerateRandomBit(float prob);
 bool GetNthBitFromByte(unsigned char byte, int n);
 bool GetBitFromArray(unsigned char *message, size_t index);
 void EncodeMessageLinear(unsigned char *message, size_t length, int channel, ImageDetails image_details);
