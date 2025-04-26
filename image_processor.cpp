@@ -150,13 +150,10 @@ void LSBtoMSB(ImageDetails image_details)
         {
             int idx = (y * image_details.width + x) * image_details.channels;
             
-            image_details.data[idx] =  image_details.data[idx] >> 1;
-            image_details.data[idx] =  image_details.data[idx] << 7;
-            
-            if (image_details.channels > 1)
+            for (int c = 0; c < std::min(image_details.channels, 3); c++)
             {
-                image_details.data[idx + 1] = 0;
-                image_details.data[idx + 2] = 0;
+                //image_details.data[idx + c] =  image_details.data[idx + c] >> 1;
+                image_details.data[idx + c] =  image_details.data[idx + c] << 7;
             }
         }
     }
@@ -164,8 +161,6 @@ void LSBtoMSB(ImageDetails image_details)
 
 void PopulateBitArraysAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image_details)
 {
-    //int intensity_channels = std::min(image_details.channels, 3);
-
     for (int y = 0; y < image_details.height; y++)
     {
         for (int x = 0; x < image_details.width; x++)
@@ -236,7 +231,7 @@ void CalculateBlockVar(Block &block)
         variance[c] /= (n - 1);
     }
     
-    float *max_variance = std::max_element(variance, variance + intensity_channels - 1);
+    float *max_variance = std::max_element(variance, variance + intensity_channels);
     block.var = *max_variance;
     block.max_var_channel = std::distance(variance, max_variance);
 }
@@ -273,12 +268,48 @@ void QuicksortBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
     }
 }
 
+void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details)
+{
+    size_t message_buf_iterator_byte = 0;
+    size_t message_buf_iterator_bit = 0;
+
+    int block_bytes = (BLOCK_SIZE * BLOCK_SIZE) / sizeof(unsigned char);
+
+    for (int i = vec_blocks.size() - 1; i >= 0; i--)
+    {   
+        //int image_byte_loc = ((vec_blocks.at(i).loc_y * image_details.width + vec_blocks.at(i).loc_x)) * image_details.channels;
+        //image_details.data[image_byte_loc] = image_details.data[image_byte_loc] | 1;
+        
+        for (int by = 0;  by < BLOCK_SIZE; by++)
+        {
+            for (int bx = 0;  bx < BLOCK_SIZE; bx++)
+            {
+                if (message_buf_iterator_byte == message_length) return;
+                int image_byte_loc = (((vec_blocks.at(i).loc_y + by) * image_details.width) + vec_blocks.at(i).loc_x + bx) * image_details.channels;
+
+                //unsigned char *image_cur_byte = &image_details.data[image_byte_loc];
+                bool bit_mask = GetNthBitFromByte(message_buffer[message_buf_iterator_byte], message_buf_iterator_bit % 8);
+
+                //*image_cur_byte = (*image_cur_byte & bit_mask);
+                image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] | bit_mask;
+
+                message_buf_iterator_bit++;
+            }
+            message_buf_iterator_byte++;
+        }
+    }
+}
+
 float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_length, int message_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
     unsigned char private_key[AES_BLOCKLEN];
     unsigned char init_vector[AES_BLOCKLEN];
-    int message_buffer_len = message_length - (message_length % -AES_BLOCKLEN);
+
+    int message_buffer_len = message_length;
+    if (message_buffer_len % AES_BLOCKLEN)
+        message_buffer_len += AES_BLOCKLEN - (message_buffer_len % AES_BLOCKLEN);
+
     unsigned char *encrypted_message_buffer = new unsigned char[message_buffer_len];
 
     memset(encrypted_message_buffer, 0x00, message_buffer_len);
@@ -300,7 +331,12 @@ float PerformEncryptionPipeline(char *message, unsigned char *key, int &key_leng
 
     std::vector<Block> second_bit_blocks = CreateBlockList(second_bits, image_details);
     delete(second_bits);
+
     QuicksortBlocks(second_bit_blocks, 0, second_bit_blocks.size() - 1);
 
-    return second_bit_blocks.at(second_bit_blocks.size() - 1).var;
+    WriteMessageToHighVarianceBlockLSB(encrypted_message_buffer, message_buffer_len, second_bit_blocks, image_details);
+
+    LSBtoMSB(image_details);
+
+    return message_buffer_len;
 }

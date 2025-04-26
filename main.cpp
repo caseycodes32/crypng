@@ -169,7 +169,7 @@ int main(int, char**)
                 //TestEncode(m_ImageDetails);
                 //ImGui::Text("Decoded msg: %s", TestDecode(m_ImageDetails).c_str());
 
-                ImGuiDisplayImage(m_ImageDetails);
+                //ImGuiDisplayImage(m_ImageDetails);
                 ImGui::Text("%s | %dx%d px | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
                 ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
                 ImGui::Separator();
@@ -207,6 +207,7 @@ int main(int, char**)
             static float blocks = 0;
             if (blocks == 0) blocks = PerformEncryptionPipeline(text, private_key, key_length, sizeof(text), m_ImageDetails);
             ImGui::Text("blocks: %f", blocks);
+            ImGuiDisplayImage(m_ImageDetails);
         }
         else if (m_UIPage == RETRIEVE_MESSAGE)
         {
