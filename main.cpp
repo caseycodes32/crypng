@@ -10,6 +10,7 @@
 
 #include "image_handler.h"
 #include "image_processor.h"
+#include "ui_helper.h"
 
 // Data stored per platform window
 struct WGL_WindowData { HDC hDC; };
@@ -168,12 +169,7 @@ int main(int, char**)
 
                 //TestEncode(m_ImageDetails);
                 //ImGui::Text("Decoded msg: %s", TestDecode(m_ImageDetails).c_str());
-                static bool xxx = false;
-                if (!xxx)
-                {
-                    LSBtoMSB(m_ImageDetails);
-                    xxx = true;
-                }
+
                 ImGuiDisplayImage(m_ImageDetails);
 
                 ImGui::Text("%s | %dx%d px | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
@@ -232,6 +228,10 @@ int main(int, char**)
             }
             ImGui::Text("Key: %d", static_cast<int>(private_key[0]));
             ImGui::Text("Iter: %d", it);
+
+            ImGui::Text("Key Phrase:");
+            ImGuiDisplayKeyPhrase(private_key, 16);
+
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
             ImGui::Separator();
             if (ImGui::Button("Back", ImVec2(0.0f, 32.0f)))
@@ -239,8 +239,8 @@ int main(int, char**)
                 m_ImageDetails = ImageDetails{};
                 m_UIPage = SELECT_FILE;
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Save Image")) 
+            ImGui::SameLine(0.0f, 100.0f);
+            if (ImGui::Button("Save Image", ImVec2(0.0f, 32.0f)))
             {
                 SaveFileDialog(m_ImageOutputPath, hwnd);
                 SaveDataToFile(m_ImageOutputPath, m_ImageDetails);

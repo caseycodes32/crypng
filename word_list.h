@@ -1,6 +1,6 @@
 #include <string>
 
-std::string words[256] = 
+const std::string key_words[256] = 
 {"abnormal",
  "abounding",
  "absorbed",
