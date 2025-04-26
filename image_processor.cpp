@@ -320,12 +320,21 @@ std::size_t HashMemory(unsigned char *data, int length)
 int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key_length, int message_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
-    //unsigned char private_key[key_length];
     unsigned char init_vector[key_length];
 
     int message_buffer_len = message_length;
     if (message_buffer_len % AES_BLOCKLEN)
         message_buffer_len += AES_BLOCKLEN - (message_buffer_len % AES_BLOCKLEN);
+
+    long long delta_mod_key_hash = 0;
+    while (true)
+    {
+        GenerateRandomKey(private_key, key_length);
+        size_t private_key_hash = HashMemory(private_key, key_length);
+
+        delta_mod_key_hash = ((private_key_hash % 16384) * 4) - message_buffer_len; // 65536 (max message buf) / 4
+        if (delta_mod_key_hash >= 0 && delta_mod_key_hash <= 4) break;
+    }
 
     unsigned char *encrypted_message_buffer = new unsigned char[message_buffer_len];
 
@@ -333,18 +342,6 @@ int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key
     memcpy(encrypted_message_buffer, message, message_buffer_len);
 
     GenerateRandomKey(init_vector, key_length);
-
-    size_t iterations = 0;
-    while (true)
-    {
-        iterations++;
-        GenerateRandomKey(private_key, key_length);
-        size_t private_key_hash = HashMemory(private_key, key_length);
-
-        long long x = (private_key_hash % 16384) - message_buffer_len; // 65536 (max message buf) / 4
-        if (x <= 4 && x >= 0) break;
-    }
-
     AES_init_ctx_iv(&ctx, private_key, init_vector);
     AES_CBC_encrypt_buffer(&ctx, encrypted_message_buffer, message_buffer_len);
     
@@ -363,5 +360,5 @@ int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key
 
     //LSBtoMSB(image_details);
 
-    return iterations;
+    return message_buffer_len;
 }
