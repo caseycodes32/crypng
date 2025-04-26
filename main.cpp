@@ -213,23 +213,14 @@ int main(int, char**)
             */
             static char message_buf[65536];
             static unsigned char private_key[16];
-            static std::string str_key = "";
-
-            static int it = 0;
 
             ImGui::Text("Enter a message to hide:");
             ImGui::InputTextMultiline("##Secret Text", message_buf, m_ImageDetails.max_chars, ImVec2(ImGui::GetContentRegionAvail().x, 0.0f));
             ImGui::Text("Characters Remaining: %d", (m_ImageDetails.max_chars - strlen(message_buf)));
 
-            if (ImGui::Button("Encode"))
-            {
-                it = PerformEncryptionPipeline(message_buf, private_key, 16, strlen(message_buf), m_ImageDetails);
-                str_key = std::string(reinterpret_cast<char*>(private_key), 16);
-            }
-            ImGui::Text("Key: %d", static_cast<int>(private_key[0]));
-            ImGui::Text("Iter: %d", it);
+            if (ImGui::Button("Encode", ImVec2(0.0f, 32.0f)))
+                PerformEncryptionPipeline(message_buf, private_key, 16, strlen(message_buf), m_ImageDetails);
 
-            ImGui::Text("Key Phrase:");
             ImGuiDisplayKeyPhrase(private_key, 16);
 
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
@@ -239,7 +230,7 @@ int main(int, char**)
                 m_ImageDetails = ImageDetails{};
                 m_UIPage = SELECT_FILE;
             }
-            ImGui::SameLine(0.0f, 100.0f);
+            ImGui::SameLine(0.0f, 270.0f);
             if (ImGui::Button("Save Image", ImVec2(0.0f, 32.0f)))
             {
                 SaveFileDialog(m_ImageOutputPath, hwnd);
@@ -248,7 +239,8 @@ int main(int, char**)
         }
         else if (m_UIPage == RETRIEVE_MESSAGE)
         {
-
+            static unsigned char private_key[16];
+            ImGuiInputKeyPhrase(private_key, 16);
         }
         
         ImGui::End();

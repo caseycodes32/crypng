@@ -15,9 +15,49 @@ void ImGuiDisplayKeyPhrase(unsigned char* key, int key_length)
         else str_keyphrase.append(" ");
     }
     ImGui::BeginChild("##KeyphraseDisplay", ImVec2(0.0f, 72.0f), ImGuiChildFlags_Border);
-        ImGui::Text(str_keyphrase.c_str());
+    ImGui::Text(str_keyphrase.c_str());
     ImGui::EndChild();
 
-    if (ImGui::Button("Copy Key Phrase", ImVec2(0.0f, 32.0f))) ImGui::SetClipboardText(str_keyphrase.c_str());
+    if (ImGui::Button("Copy Key Phrase To Clipboard", ImVec2(0.0f, 32.0f))) ImGui::SetClipboardText(str_keyphrase.c_str());
+}
+
+void ImGuiInputKeyPhrase(unsigned char* key, int key_length)
+{
+    static bool error_invalid_keyphrase = false;
+    static char keyphrase_input_buf[1024];
+    ImGui::InputTextMultiline("##Keyphrase Entry", keyphrase_input_buf, sizeof(keyphrase_input_buf), ImVec2(ImGui::GetContentRegionAvail().x, 0.0f));
+    if (ImGui::Button("Decode", ImVec2(0.0f, 32.0f)))
+    {
+        error_invalid_keyphrase = false;
+        unsigned char possible_key[16];
+        int key_iterator = 0;
+        std::string s_keyphrase(keyphrase_input_buf);
+        std::stringstream ss_keyphrase(s_keyphrase);
+
+        std::string cur_word;
+
+        while (ss_keyphrase >> cur_word)
+        {
+            static int key_words_len = sizeof(key_words) / sizeof(key_words[0]);
+            const std::string *loc_word = std::find(key_words, key_words + key_words_len, cur_word);
+
+            if (loc_word != key_words + key_words_len)
+            {
+                unsigned char idx = std::distance(key_words, loc_word);
+                possible_key[key_iterator] = idx;
+                key_iterator++;
+            }
+            else
+            {
+                error_invalid_keyphrase = true;
+                return;
+            }
+        }
+        if (key_iterator == 15)
+        {
+            memcpy(key, possible_key, 16);
+        }
+    }
+    if (error_invalid_keyphrase) ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Error - Invalid Keyphrase Entered");
 
 }
