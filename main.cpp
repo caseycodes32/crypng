@@ -88,7 +88,7 @@ int main(int, char**)
     //style.GrabRounding = 8.f;
     style.WindowRounding = 8.f;
     //style.PopupRounding = 8.f;
-    //style.ChildRounding = 8.f;
+    style.ChildRounding = 2.f;
     style.Colors[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
     style.AntiAliasedLines = false;
     style.AntiAliasedFill = false;
