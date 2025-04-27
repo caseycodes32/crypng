@@ -343,7 +343,7 @@ std::size_t HashMemory(unsigned char *data, int length)
     return hash_value;
 }
 
-int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key_length, int message_length, ImageDetails image_details)
+int PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
     unsigned char init_vector[key_length];
@@ -352,7 +352,7 @@ int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key
     if (message_buffer_len % AES_BLOCKLEN)
         message_buffer_len += AES_BLOCKLEN - (message_buffer_len % AES_BLOCKLEN);
 
-    if (message_buffer_len == 0) return;
+    if (message_buffer_len == 0) return 0;
 
     long long delta_mod_key_hash = 0;
     while (true)
@@ -392,17 +392,21 @@ int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key
     return message_buffer_len;
 }
 
-void PerformDecryptionPipeline(char *message_buffer, unsigned char *private_key, int key_length, ImageDetails image_details)
+int PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
     unsigned char init_vector[key_length];
+    memset(init_vector, 0x00, key_length);
 
     size_t private_key_hash = HashMemory(private_key, key_length);
-    int message_length = (((private_key_hash % 4096) * 16) + 16);
+    int decoded_message_length = (((private_key_hash % 4096) * 16) + 16);
+
+    message_length = decoded_message_length;
 
     //GenerateRandomKey(init_vector, key_length);
 
-    unsigned char *decrypted_message_buffer = new unsigned char[message_length];
+    unsigned char *decrypted_message_buffer = new unsigned char[decoded_message_length];
+    memset(decrypted_message_buffer, 0x00, decoded_message_length);
 
     int bit_array_len = image_details.width * image_details.height * image_details.channels;
     bool *second_bits = new bool[bit_array_len];
@@ -414,8 +418,15 @@ void PerformDecryptionPipeline(char *message_buffer, unsigned char *private_key,
 
     QuicksortBlocks(second_bit_blocks, 0, second_bit_blocks.size() - 1);
 
-    ReadMessageFromHighVarianceBlockLSB(decrypted_message_buffer, message_length, second_bit_blocks, image_details);
+    ReadMessageFromHighVarianceBlockLSB(decrypted_message_buffer, decoded_message_length, second_bit_blocks, image_details);
+
+    //GenerateRandomKey(init_vector, key_length);
+    AES_init_ctx_iv(&ctx, private_key, init_vector);
+    AES_CBC_decrypt_buffer(&ctx, decrypted_message_buffer, decoded_message_length);
+
+    memcpy(message_buffer, decrypted_message_buffer, decoded_message_length);
+
     delete(decrypted_message_buffer);
 
-    memcpy(message_buffer, decrypted_message_buffer, message_length);
+    return decoded_message_length;
 }

@@ -26,7 +26,7 @@ void ImGuiInputKeyPhrase(unsigned char* key, int key_length)
     static bool error_invalid_keyphrase = false;
     static char keyphrase_input_buf[1024];
     ImGui::InputTextMultiline("##Keyphrase Entry", keyphrase_input_buf, sizeof(keyphrase_input_buf), ImVec2(ImGui::GetContentRegionAvail().x, 0.0f));
-    if (ImGui::Button("Decode", ImVec2(0.0f, 32.0f)))
+    if (ImGui::Button("Enter Keyphrase", ImVec2(0.0f, 32.0f)))
     {
         error_invalid_keyphrase = false;
         unsigned char possible_key[16];

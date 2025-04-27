@@ -57,4 +57,5 @@ void QuicksortBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details);
 void ReadMessageFromHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details);
 std::size_t HashMemory(unsigned char *data, int length);
-int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key_length, int message_length, ImageDetails image_details);
+int PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details);
+int PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details);

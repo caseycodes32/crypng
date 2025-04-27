@@ -203,15 +203,17 @@ int main(int, char**)
         {
             static char message_buf[65536];
             static unsigned char private_key[16];
+            static int message_length = 0;
 
             ImGui::Text("Enter a message to hide:");
             ImGui::InputTextMultiline("##Secret Text", message_buf, m_ImageDetails.max_chars, ImVec2(ImGui::GetContentRegionAvail().x, 0.0f));
             ImGui::Text("Characters Remaining: %d", (m_ImageDetails.max_chars - strlen(message_buf)));
 
             if (ImGui::Button("Encode", ImVec2(0.0f, 32.0f)))
-                PerformEncryptionPipeline(message_buf, private_key, 16, strlen(message_buf), m_ImageDetails);
+            message_length = PerformEncryptionPipeline(message_buf, strlen(message_buf), private_key, 16, m_ImageDetails);
 
             ImGuiDisplayKeyPhrase(private_key, 16);
+            ImGui::Text("len: %d", message_length);
 
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
             ImGui::Separator();
@@ -229,10 +231,24 @@ int main(int, char**)
         }
         else if (m_UIPage == RETRIEVE_MESSAGE)
         {
+            static char message_buf[65536];
             static unsigned char private_key[16];
+            static int message_length = 0;
 
             ImGui::Text("Enter the key phrase:");
             ImGuiInputKeyPhrase(private_key, 16);
+
+            if (ImGui::Button("Decode", ImVec2(0.0f, 32.0f)))
+            {
+                PerformDecryptionPipeline(message_buf, message_length, private_key, 16, m_ImageDetails);
+                message_buf[message_length] = '\0';
+            }
+
+            if (message_length)
+            {
+                ImGui::Text("len: %d", message_length);
+                ImGui::Text(message_buf);
+            }
 
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
             ImGui::Separator();
