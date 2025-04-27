@@ -305,6 +305,32 @@ void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int messa
     }
 }
 
+void ReadMessageFromHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details)
+{
+    size_t message_buf_iterator_bit = 0;
+
+    for (int i = vec_blocks.size() - 1; i >= 0; i--)
+    {   
+        for (int by = 0;  by < BLOCK_SIZE; by++)
+        {
+            for (int bx = 0;  bx < BLOCK_SIZE; bx++)
+            {
+                if ((message_buf_iterator_bit / 8) < message_length)
+                {
+                    int image_byte_loc = (((vec_blocks.at(i).loc_y + by) * image_details.width) + vec_blocks.at(i).loc_x + bx) * image_details.channels;
+
+                    bool current_bit = GetNthBitFromByte(image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel], 0);
+
+                    AppendBitToArray(message_buffer, message_buf_iterator_bit, current_bit);
+
+                    message_buf_iterator_bit++;
+                }
+                else return;
+            }
+        }
+    }
+}
+
 std::size_t HashMemory(unsigned char *data, int length)
 {
     size_t hash_value = 0;
@@ -326,14 +352,16 @@ int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key
     if (message_buffer_len % AES_BLOCKLEN)
         message_buffer_len += AES_BLOCKLEN - (message_buffer_len % AES_BLOCKLEN);
 
+    if (message_buffer_len == 0) return;
+
     long long delta_mod_key_hash = 0;
     while (true)
     {
         GenerateRandomKey(private_key, key_length);
         size_t private_key_hash = HashMemory(private_key, key_length);
 
-        delta_mod_key_hash = ((private_key_hash % 16384) * 4) - message_buffer_len; // 65536 (max message buf) / 4
-        if (delta_mod_key_hash >= 0 && delta_mod_key_hash <= 4) break;
+        delta_mod_key_hash = (((private_key_hash % 4096) * 16) + 16) - message_buffer_len; // 65536 (max message buf) / 4
+        if (delta_mod_key_hash == 0) break;
     }
 
     unsigned char *encrypted_message_buffer = new unsigned char[message_buffer_len];
@@ -357,8 +385,37 @@ int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key
     QuicksortBlocks(second_bit_blocks, 0, second_bit_blocks.size() - 1);
 
     WriteMessageToHighVarianceBlockLSB(encrypted_message_buffer, message_buffer_len, second_bit_blocks, image_details);
+    delete(encrypted_message_buffer);
 
     //LSBtoMSB(image_details);
 
     return message_buffer_len;
+}
+
+void PerformDecryptionPipeline(char *message_buffer, unsigned char *private_key, int key_length, ImageDetails image_details)
+{
+    struct AES_ctx ctx;
+    unsigned char init_vector[key_length];
+
+    size_t private_key_hash = HashMemory(private_key, key_length);
+    int message_length = (((private_key_hash % 4096) * 16) + 16);
+
+    //GenerateRandomKey(init_vector, key_length);
+
+    unsigned char *decrypted_message_buffer = new unsigned char[message_length];
+
+    int bit_array_len = image_details.width * image_details.height * image_details.channels;
+    bool *second_bits = new bool[bit_array_len];
+
+    PopulateBitArraysAndZeroLSB(nullptr, second_bits, image_details);
+
+    std::vector<Block> second_bit_blocks = CreateBlockList(second_bits, image_details);
+    delete(second_bits);
+
+    QuicksortBlocks(second_bit_blocks, 0, second_bit_blocks.size() - 1);
+
+    ReadMessageFromHighVarianceBlockLSB(decrypted_message_buffer, message_length, second_bit_blocks, image_details);
+    delete(decrypted_message_buffer);
+
+    memcpy(message_buffer, decrypted_message_buffer, message_length);
 }
