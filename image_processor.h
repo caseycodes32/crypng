@@ -29,6 +29,11 @@ struct Block
     float *mean;
 };
 
+struct EncryptionDetails
+{
+    int message_buffer_len;
+};
+
 std::string test_aes();
 void InitializeRandomSeed();
 void GenerateRandomKey(unsigned char *key, size_t length);
@@ -50,5 +55,6 @@ void CalculateBlockVar(Block &block);
 int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 void QuicksortBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details);
+void ReadMessageFromHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details);
 std::size_t HashMemory(unsigned char *data, int length);
 int PerformEncryptionPipeline(char *message, unsigned char *private_key, int key_length, int message_length, ImageDetails image_details);
