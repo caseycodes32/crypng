@@ -201,7 +201,7 @@ int main(int, char**)
         }
         else if (m_UIPage == HIDE_MESSAGE)
         {
-            static char message_buf[65536];
+            static char message_buf[65536] = { 0x00 };
             static unsigned char private_key[16];
             static int message_length = 0;
 

@@ -352,6 +352,8 @@ int PerformEncryptionPipeline(char *message, int message_length, unsigned char *
     if (message_buffer_len % AES_BLOCKLEN)
         message_buffer_len += AES_BLOCKLEN - (message_buffer_len % AES_BLOCKLEN);
 
+    if (message_buffer_len == 16) message_buffer_len = 32;
+
     if (message_buffer_len == 0) return 0;
 
     long long delta_mod_key_hash = 0;
