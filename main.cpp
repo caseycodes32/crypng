@@ -206,7 +206,7 @@ int main(int, char**)
             static int message_length = 0;
 
             ImGui::Text("Enter a message to hide:");
-            ImGui::InputTextMultiline("##Secret Text", message_buf, m_ImageDetails.max_chars, ImVec2(ImGui::GetContentRegionAvail().x, 0.0f));
+            ImGui::InputTextMultiline("##Secret Text", message_buf, m_ImageDetails.max_chars, ImVec2(ImGui::GetContentRegionAvail().x, 192.0f));
             ImGui::Text("Characters Remaining: %d", (m_ImageDetails.max_chars - strlen(message_buf)));
 
             if (ImGui::Button("Encode", ImVec2(0.0f, 32.0f)))
@@ -245,7 +245,7 @@ int main(int, char**)
             {
                 ImGui::Separator();
                 ImGui::Text("Decoded Message:");
-                ImGui::BeginChild("##MessageDisplay", ImVec2(0.0f, 72.0f), ImGuiChildFlags_Border);
+                ImGui::BeginChild("##MessageDisplay", ImVec2(0.0f, 128.0f), ImGuiChildFlags_Border);
                 ImGui::Text(message_buf);
                 ImGui::EndChild();
                 if (ImGui::Button("Copy", ImVec2(0.0f, 32.0f)))
