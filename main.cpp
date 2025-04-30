@@ -238,16 +238,18 @@ int main(int, char**)
             ImGui::Text("Enter the key phrase:");
             ImGuiInputKeyPhrase(private_key, 16);
 
-            if (ImGui::Button("Decode", ImVec2(0.0f, 32.0f)))
-            {
+            if (ImGui::Button("Decode Message", ImVec2(0.0f, 32.0f)))
                 PerformDecryptionPipeline(message_buf, message_length, private_key, 16, m_ImageDetails);
-                //message_buf[message_length] = '\0';
-            }
 
             if (message_length)
             {
-                ImGui::Text("len: %d", message_length);
+                ImGui::Separator();
+                ImGui::Text("Decoded Message:");
+                ImGui::BeginChild("##MessageDisplay", ImVec2(0.0f, 72.0f), ImGuiChildFlags_Border);
                 ImGui::Text(message_buf);
+                ImGui::EndChild();
+                if (ImGui::Button("Copy", ImVec2(0.0f, 32.0f)))
+                    ImGui::SetClipboardText(message_buf);
             }
 
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
