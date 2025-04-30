@@ -346,7 +346,7 @@ std::size_t HashMemory(unsigned char *data, int length)
 int PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
-    unsigned char init_vector[key_length];
+    unsigned char init_vector[key_length] = { 0x9D };
 
     int message_buffer_len = message_length;
     if (message_buffer_len % AES_BLOCKLEN)
@@ -369,7 +369,7 @@ int PerformEncryptionPipeline(char *message, int message_length, unsigned char *
     memset(encrypted_message_buffer, 0x00, message_buffer_len);
     memcpy(encrypted_message_buffer, message, message_buffer_len);
 
-    GenerateRandomKey(init_vector, key_length);
+    //GenerateRandomKey(init_vector, key_length);
     AES_init_ctx_iv(&ctx, private_key, init_vector);
     AES_CBC_encrypt_buffer(&ctx, encrypted_message_buffer, message_buffer_len);
     
@@ -395,8 +395,8 @@ int PerformEncryptionPipeline(char *message, int message_length, unsigned char *
 int PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
-    unsigned char init_vector[key_length];
-    memset(init_vector, 0x00, key_length);
+    unsigned char init_vector[key_length] = { 0x9D };
+    //memset(init_vector, 0x00, key_length);
 
     size_t private_key_hash = HashMemory(private_key, key_length);
     int decoded_message_length = (((private_key_hash % 4096) * 16) + 16);

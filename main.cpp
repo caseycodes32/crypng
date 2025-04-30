@@ -241,7 +241,7 @@ int main(int, char**)
             if (ImGui::Button("Decode", ImVec2(0.0f, 32.0f)))
             {
                 PerformDecryptionPipeline(message_buf, message_length, private_key, 16, m_ImageDetails);
-                message_buf[message_length] = '\0';
+                //message_buf[message_length] = '\0';
             }
 
             if (message_length)
