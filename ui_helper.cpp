@@ -65,7 +65,7 @@ void UIHelper::ImGuiInputKeyPhrase(unsigned char* key, int key_length)
         else error_invalid_keyphrase = true;
     }
     if (error_invalid_keyphrase)
-        ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Error - Invalid Keyphrase Entered");
+        ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Error - Invalid Key Phrase Entered");
     else if (input_complete)
         ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Key Phrase Accepted");
 
@@ -74,6 +74,6 @@ void UIHelper::ImGuiInputKeyPhrase(unsigned char* key, int key_length)
 std::string UIHelper::ClampFileName(std::string file_name, int chars)
 {
     if (file_name.length() > chars)
-        return file_name.substr(chars);
+        return ("..." + file_name.substr(chars - 3));
     else return file_name;
 }

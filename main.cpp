@@ -17,7 +17,7 @@ struct WGL_WindowData { HDC hDC; };
 
 // Constants
 static const POINT      k_WindowSize = {400, 500};
-enum UIPage { SELECT_FILE, HIDE_MESSAGE, RETRIEVE_MESSAGE, PROCESS_IMAGE, SAVE_IMAGE };
+enum UIPage { SELECT_FILE, HIDE_MESSAGE, RETRIEVE_MESSAGE };
 
 
 // UI Data
@@ -33,6 +33,7 @@ std::string             m_ImageInputPath;
 std::string             m_ImageOutputPath;
 ImageDetails            m_ImageDetails;
 UIPage                  m_UIPage = SELECT_FILE;
+bool                    m_ResetData = false;
 
 // Forward declarations of helper functions
 bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
@@ -176,6 +177,7 @@ int main(int, char**)
                 {
                     m_ImageDetails = ImageDetails{};
                     OpenFileDialog(m_ImageInputPath, hwnd);
+                    m_ResetData = true;
                 }
                 ImGui::SameLine(0.0f, 16.0f);
                 if (ImGui::Button("Encode Message", ImVec2(0.0f, 32.0f)))
@@ -193,6 +195,13 @@ int main(int, char**)
         {
             static char message_buf[65536] = { 0x00 };
             static unsigned char private_key[16];
+            
+            if (m_ResetData)
+            {
+                m_ResetData = false;
+                memset(message_buf, 0x00, 65536);
+                memset(private_key, 0x00, 16);
+            }
 
             ImGui::Text("Enter a message to hide:");
             ImGui::InputTextMultiline("##Secret Text", message_buf, m_ImageDetails.max_chars, ImVec2(ImGui::GetContentRegionAvail().x, 192.0f));
@@ -222,6 +231,14 @@ int main(int, char**)
             static char message_buf[65536];
             static unsigned char private_key[16];
             static int message_length = 0;
+            
+            if (m_ResetData)
+            {
+                m_ResetData = false;
+                memset(message_buf, 0x00, 65536);
+                memset(private_key, 0x00, 16);
+                message_length = 0;
+            }
 
             ImGui::Text("Enter the key phrase:");
             UIHelper::ImGuiInputKeyPhrase(private_key, 16);
