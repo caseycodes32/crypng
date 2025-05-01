@@ -166,7 +166,7 @@ void LSBtoMSB(ImageDetails image_details)
     }
 }
 
-void PopulateBitArraysAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image_details)
+void PopulateBitArrayAndZeroLSB(bool *second_lsb, ImageDetails image_details)
 {
     for (int y = 0; y < image_details.height; y++)
     {
@@ -176,14 +176,7 @@ void PopulateBitArraysAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image
             
             for (int c = 0; c < image_details.channels; c++)
             {
-                //lsb[idx + c] = GetNthBitFromByte(image_details.data[idx + c], 0);
                 second_lsb[idx + c] = GetNthBitFromByte(image_details.data[idx + c], 1);
-
-                if (c != 3)
-                {
-                    //image_details.data[idx + c] = image_details.data[idx + c] >> 1;
-                    //image_details.data[idx + c] = image_details.data[idx + c] << 1;
-                }
             }
         }
     }
@@ -210,7 +203,7 @@ std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details)
             for (int i = 0; i < BLOCK_SIZE; i++)
                 memcpy(current_block.block_bits + (i * block_width), bits + (((y + i) * image_details.width + x) * image_details.channels), block_width);
 
-            CalculateBlockVar(current_block);
+            CalculateBlockStats(current_block);
             block_list.push_back(current_block);
             delete(current_block.block_bits);
         }
@@ -218,7 +211,7 @@ std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details)
     return block_list;
 }
 
-void CalculateBlockVar(Block &block)
+void CalculateBlockStats(Block &block)
 {
     int n = BLOCK_SIZE * BLOCK_SIZE;
     int intensity_channels = std::min((int)block.channels, 3);
@@ -343,19 +336,21 @@ std::size_t HashMemory(unsigned char *data, int length)
     return hash_value;
 }
 
-int PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
+void PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
     unsigned char init_vector[key_length];
-    memset(init_vector, 0x00, key_length);
+    memset(init_vector, 0x9D, key_length);
 
     int message_buffer_len = message_length;
     if (message_buffer_len % AES_BLOCKLEN)
         message_buffer_len += AES_BLOCKLEN - (message_buffer_len % AES_BLOCKLEN);
 
-    if (message_buffer_len == 16) message_buffer_len = 32;
+    if (message_buffer_len == 16)
+        message_buffer_len = 32;
 
-    if (message_buffer_len == 0) return 0;
+    if (message_buffer_len == 0)
+        return;
 
     long long delta_mod_key_hash = 0;
     while (true)
@@ -372,15 +367,13 @@ int PerformEncryptionPipeline(char *message, int message_length, unsigned char *
     memset(encrypted_message_buffer, 0x00, message_buffer_len);
     memcpy(encrypted_message_buffer, message, message_buffer_len);
 
-    //GenerateRandomKey(init_vector, key_length);
     AES_init_ctx_iv(&ctx, private_key, init_vector);
     AES_CBC_encrypt_buffer(&ctx, encrypted_message_buffer, message_buffer_len);
     
     int bit_array_len = image_details.width * image_details.height * image_details.channels;
-    bool *first_bits = new bool[1];
     bool *second_bits = new bool[bit_array_len];
 
-    PopulateBitArraysAndZeroLSB(first_bits, second_bits, image_details);
+    PopulateBitArrayAndZeroLSB(second_bits, image_details);
 
     std::vector<Block> second_bit_blocks = CreateBlockList(second_bits, image_details);
     delete(second_bits);
@@ -389,17 +382,13 @@ int PerformEncryptionPipeline(char *message, int message_length, unsigned char *
 
     WriteMessageToHighVarianceBlockLSB(encrypted_message_buffer, message_buffer_len, second_bit_blocks, image_details);
     delete(encrypted_message_buffer);
-
-    //LSBtoMSB(image_details);
-
-    return message_buffer_len;
 }
 
-int PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
+void PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
     unsigned char init_vector[key_length];
-    memset(init_vector, 0x00, key_length);
+    memset(init_vector, 0x9D, key_length);
 
     size_t private_key_hash = HashMemory(private_key, key_length);
     int decoded_message_length = (((private_key_hash % 4096) * 16) + 16);
@@ -412,7 +401,7 @@ int PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigne
     int bit_array_len = image_details.width * image_details.height * image_details.channels;
     bool *second_bits = new bool[bit_array_len];
 
-    PopulateBitArraysAndZeroLSB(nullptr, second_bits, image_details);
+    PopulateBitArrayAndZeroLSB(second_bits, image_details);
 
     std::vector<Block> second_bit_blocks = CreateBlockList(second_bits, image_details);
     delete(second_bits);
@@ -421,13 +410,10 @@ int PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigne
 
     ReadMessageFromHighVarianceBlockLSB(decrypted_message_buffer, decoded_message_length, second_bit_blocks, image_details);
 
-    //GenerateRandomKey(init_vector, key_length);
     AES_init_ctx_iv(&ctx, private_key, init_vector);
     AES_CBC_decrypt_buffer(&ctx, decrypted_message_buffer, decoded_message_length);
 
     memcpy(message_buffer, decrypted_message_buffer, decoded_message_length);
 
     delete(decrypted_message_buffer);
-
-    return decoded_message_length;
 }

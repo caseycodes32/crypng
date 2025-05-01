@@ -42,20 +42,17 @@ bool GetNthBitFromByte(unsigned char byte, int n);
 bool GetBitFromArray(unsigned char *message, size_t index);
 void EncodeMessageLinear(unsigned char *message, size_t length, int channel, ImageDetails image_details);
 std::string DecodeMessageLinear(size_t length, int channel, ImageDetails image_details);
-
 void TestEncode(ImageDetails image_details);
 std::string TestDecode(ImageDetails image_details);
-
 void ZeroLSB(ImageDetails image_details);
 void LSBtoMSB(ImageDetails image_details);
-void PopulateBitArraysAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image_details);
-
+void PopulateBitArrayAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image_details);
 std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details);
-void CalculateBlockVar(Block &block);
+void CalculateBlockStats(Block &block);
 int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 void QuicksortBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details);
 void ReadMessageFromHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details);
 std::size_t HashMemory(unsigned char *data, int length);
-int PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details);
-int PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details);
+void PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details);
+void PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details);
