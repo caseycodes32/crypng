@@ -2,7 +2,8 @@
 
 void UIHelper::ImGuiDisplayKeyPhrase(unsigned char* key, int key_length)
 {
-    if (!(key[0] || key[1] || key[2] || key[3])) return;
+    if (!(key[0] || key[1] || key[2] || key[3]))
+        return;
 
     ImGui::Separator();
     ImGui::Text("Key Phrase (Please Copy!):");
@@ -18,7 +19,8 @@ void UIHelper::ImGuiDisplayKeyPhrase(unsigned char* key, int key_length)
     ImGui::Text(str_keyphrase.c_str());
     ImGui::EndChild();
 
-    if (ImGui::Button("Copy Key Phrase", ImVec2(0.0f, 32.0f))) ImGui::SetClipboardText(str_keyphrase.c_str());
+    if (ImGui::Button("Copy Key Phrase", ImVec2(0.0f, 32.0f)))
+        ImGui::SetClipboardText(str_keyphrase.c_str());
 }
 
 void UIHelper::ImGuiInputKeyPhrase(unsigned char* key, int key_length)

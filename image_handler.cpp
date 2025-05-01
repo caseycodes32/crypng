@@ -3,22 +3,22 @@
 
 std::string FilenameFromPath(std::string path)
 {
-    size_t idxLastSlash = path.find_last_of("/\\");
-    if (idxLastSlash != std::string::npos)
+    size_t idx_last_fslash = path.find_last_of("/\\");
+    if (idx_last_fslash != std::string::npos)
     {
-        return path.substr(idxLastSlash + 1);
+        return path.substr(idx_last_fslash + 1);
     }
     return path;
 }
 
 bool OpenFileDialog(std::string &file_path, HWND hwnd)
 {
-    char c_FilePath[MAX_PATH] = "";
+    char c_file_path[MAX_PATH] = "";
     OPENFILENAMEA ofn;
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
     ofn.hwndOwner = NULL;
-    ofn.lpstrFile = c_FilePath;
+    ofn.lpstrFile = c_file_path;
     ofn.nMaxFile = MAX_PATH;
     ofn.lpstrFilter = "Image Files\0*.png\0";
     ofn.nFilterIndex = 1;
@@ -26,7 +26,7 @@ bool OpenFileDialog(std::string &file_path, HWND hwnd)
 
     if (GetOpenFileNameA(&ofn) == TRUE)
     {
-        file_path = std::string(c_FilePath);
+        file_path = std::string(c_file_path);
         return true;
     }
     else file_path = "";
@@ -36,12 +36,12 @@ bool OpenFileDialog(std::string &file_path, HWND hwnd)
 
 bool SaveFileDialog(std::string &file_path, HWND hwnd)
 {
-    char c_FilePath[MAX_PATH] = "";
+    char c_file_path[MAX_PATH] = "";
     OPENFILENAMEA ofn;
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
     ofn.hwndOwner = NULL;
-    ofn.lpstrFile = c_FilePath;
+    ofn.lpstrFile = c_file_path;
     ofn.nMaxFile = MAX_PATH;
     ofn.lpstrFilter = "PNG Files\0*.png\0";
     ofn.nFilterIndex = 1;
@@ -49,7 +49,7 @@ bool SaveFileDialog(std::string &file_path, HWND hwnd)
 
     if (GetSaveFileNameA(&ofn) == TRUE)
     {
-        file_path = std::string(c_FilePath);
+        file_path = std::string(c_file_path);
         if (file_path.substr(file_path.length() - 4) != ".png")
             file_path.append(".png");
 
@@ -117,9 +117,9 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool s
         if (image_details.data != NULL)
         {
             // Create a OpenGL texture identifier
-            GLuint gl_ImageTexture;
-            glGenTextures(1, &gl_ImageTexture);
-            glBindTexture(GL_TEXTURE_2D, gl_ImageTexture);
+            GLuint gl_image_texture;
+            glGenTextures(1, &gl_image_texture);
+            glBindTexture(GL_TEXTURE_2D, gl_image_texture);
 
             // Setup filtering parameters for display
             if (smooth)
@@ -149,7 +149,7 @@ void LoadTextureFromData(GLuint *out_texture, ImageDetails image_details, bool s
                     break;
             }
 
-            *out_texture = gl_ImageTexture;
+            *out_texture = gl_image_texture;
             return;
         }
     }
@@ -164,8 +164,8 @@ void CopyImageInMemory(ImageDetails id_current, ImageDetails &id_new)
     id_new.normalized_height = id_current.normalized_height;
     id_new.name = id_current.name;
 
-    size_t s_ImageSize = (id_current.width * id_current.height * id_current.channels);
-    memcpy(id_new.data, id_current.data, s_ImageSize);
+    size_t image_size = (id_current.width * id_current.height * id_current.channels);
+    memcpy(id_new.data, id_current.data, image_size);
 }
 
 size_t GetMaximumCharactersFromImage(ImageDetails image_details)
@@ -177,29 +177,28 @@ size_t GetMaximumCharactersFromImage(ImageDetails image_details)
 
 void ImGuiDisplayImage(ImageDetails image_details)
 {
-    static GLuint gl_ImageTexture = 0;
-    static unsigned char *t_ImageData = 0;
+    static GLuint gl_image_texture = 0;
+    static unsigned char *ptr_image_data = 0;
 
-    //roLSB(image_details);
-    if (t_ImageData != image_details.data)
+    if (ptr_image_data != image_details.data)
     {
-        stbi_image_free(t_ImageData);
-        glDeleteTextures(1, &gl_ImageTexture);
-        gl_ImageTexture = 0;
+        stbi_image_free(ptr_image_data);
+        glDeleteTextures(1, &gl_image_texture);
+        gl_image_texture = 0;
     }
-    LoadTextureFromData(&gl_ImageTexture, image_details, true);
-    ImGui::Image((ImTextureID)(intptr_t)gl_ImageTexture, ImVec2(image_details.normalized_width, image_details.normalized_height));
-    t_ImageData = image_details.data;
+    LoadTextureFromData(&gl_image_texture, image_details, true);
+    ImGui::Image((ImTextureID)(intptr_t)gl_image_texture, ImVec2(image_details.normalized_width, image_details.normalized_height));
+    ptr_image_data = image_details.data;
 }
 
 void ImGuiDisplayLogo()
 {
-    static ImageDetails t_ImageDetails;
-    static GLuint gl_LogoTexture = 0;
-    LoadDataFromArray(crypng_logo, 1192, "logo", t_ImageDetails);
-    LoadTextureFromData(&gl_LogoTexture, t_ImageDetails, false);
-    stbi_image_free(t_ImageDetails.data);
-    t_ImageDetails.data = NULL;
+    static ImageDetails logo_image_details;
+    static GLuint gl_logo_texture = 0;
+    LoadDataFromArray(crypng_logo, 1192, "logo", logo_image_details);
+    LoadTextureFromData(&gl_logo_texture, logo_image_details, false);
+    stbi_image_free(logo_image_details.data);
+    logo_image_details.data = NULL;
     ImGui::SetCursorPos(ImVec2(8, 148));
-    ImGui::Image((ImTextureID)(intptr_t)gl_LogoTexture, ImVec2(384, 120));
+    ImGui::Image((ImTextureID)(intptr_t)gl_logo_texture, ImVec2(384, 120));
 }

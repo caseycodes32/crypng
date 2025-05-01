@@ -239,7 +239,7 @@ int main(int, char**)
                 if (ImGui::Button("Copy Message", ImVec2(0.0f, 32.0f)))
                     ImGui::SetClipboardText(message_buf);
                 ImGui::SameLine();
-                ImGui::Text("Note: Decoded text may be longer than \nmessage shown above");
+                ImGui::Text("Note: Decoded text may be longer than\nmessage shown above");
             }
 
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
