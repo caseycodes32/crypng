@@ -169,7 +169,7 @@ int main(int, char**)
 
                 ImGuiDisplayImage(m_ImageDetails);
 
-                ImGui::Text("%s | %dx%d px | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
+                ImGui::Text("%s | %dx%d px | %d channels", UIHelper::ClampFileName(m_ImageDetails.name, 20).c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
                 ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
                 ImGui::Separator();
                 if (ImGui::Button("Select Another Image", ImVec2(0.0f, 32.0f)))
@@ -201,7 +201,7 @@ int main(int, char**)
             if (ImGui::Button("Encode", ImVec2(0.0f, 32.0f)))
             PerformEncryptionPipeline(message_buf, strlen(message_buf), private_key, 16, m_ImageDetails);
 
-            ImGuiDisplayKeyPhrase(private_key, 16);
+            UIHelper::ImGuiDisplayKeyPhrase(private_key, 16);
 
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
             ImGui::Separator();
@@ -224,7 +224,7 @@ int main(int, char**)
             static int message_length = 0;
 
             ImGui::Text("Enter the key phrase:");
-            ImGuiInputKeyPhrase(private_key, 16);
+            UIHelper::ImGuiInputKeyPhrase(private_key, 16);
 
             if (ImGui::Button("Decode Message", ImVec2(0.0f, 32.0f)))
                 PerformDecryptionPipeline(message_buf, message_length, private_key, 16, m_ImageDetails);

@@ -1,6 +1,6 @@
 #include "ui_helper.h"
 
-void ImGuiDisplayKeyPhrase(unsigned char* key, int key_length)
+void UIHelper::ImGuiDisplayKeyPhrase(unsigned char* key, int key_length)
 {
     if (!(key[0] || key[1] || key[2] || key[3])) return;
 
@@ -21,7 +21,7 @@ void ImGuiDisplayKeyPhrase(unsigned char* key, int key_length)
     if (ImGui::Button("Copy Key Phrase", ImVec2(0.0f, 32.0f))) ImGui::SetClipboardText(str_keyphrase.c_str());
 }
 
-void ImGuiInputKeyPhrase(unsigned char* key, int key_length)
+void UIHelper::ImGuiInputKeyPhrase(unsigned char* key, int key_length)
 {
     static bool error_invalid_keyphrase = false;
     static bool input_complete = false;
@@ -67,4 +67,11 @@ void ImGuiInputKeyPhrase(unsigned char* key, int key_length)
     else if (input_complete)
         ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Key Phrase Accepted");
 
+}
+
+std::string UIHelper::ClampFileName(std::string file_name, int chars)
+{
+    if (file_name.length() > chars)
+        return file_name.substr(chars);
+    else return file_name;
 }
