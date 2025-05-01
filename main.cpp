@@ -194,13 +194,13 @@ int main(int, char**)
         else if (m_UIPage == HIDE_MESSAGE)
         {
             static char message_buf[65536] = { 0x00 };
-            static unsigned char private_key[16];
+            static unsigned char private_key[AES_KEYLEN];
             
             if (m_ResetData)
             {
                 m_ResetData = false;
                 memset(message_buf, 0x00, 65536);
-                memset(private_key, 0x00, 16);
+                memset(private_key, 0x00, AES_KEYLEN);
             }
 
             ImGui::Text("Enter a message to hide:");
@@ -208,9 +208,9 @@ int main(int, char**)
             ImGui::Text("Characters Remaining: %d", (m_ImageDetails.max_chars - strlen(message_buf)));
 
             if (ImGui::Button("Encode", ImVec2(0.0f, 32.0f)))
-            PerformEncryptionPipeline(message_buf, strlen(message_buf), private_key, 16, m_ImageDetails);
+                PerformEncryptionPipeline(message_buf, strlen(message_buf), private_key, AES_KEYLEN, m_ImageDetails);
 
-            UIHelper::ImGuiDisplayKeyPhrase(private_key, 16);
+            UIHelper::ImGuiDisplayKeyPhrase(private_key, AES_KEYLEN);
 
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
             ImGui::Separator();
@@ -229,22 +229,22 @@ int main(int, char**)
         else if (m_UIPage == RETRIEVE_MESSAGE)
         {
             static char message_buf[65536];
-            static unsigned char private_key[16];
+            static unsigned char private_key[AES_KEYLEN];
             static int message_length = 0;
             
             if (m_ResetData)
             {
                 m_ResetData = false;
                 memset(message_buf, 0x00, 65536);
-                memset(private_key, 0x00, 16);
+                memset(private_key, 0x00, AES_KEYLEN);
                 message_length = 0;
             }
 
             ImGui::Text("Enter the key phrase:");
-            UIHelper::ImGuiInputKeyPhrase(private_key, 16);
+            UIHelper::ImGuiInputKeyPhrase(private_key, AES_KEYLEN);
 
             if (ImGui::Button("Decode Message", ImVec2(0.0f, 32.0f)))
-                PerformDecryptionPipeline(message_buf, message_length, private_key, 16, m_ImageDetails);
+                PerformDecryptionPipeline(message_buf, message_length, private_key, AES_KEYLEN, m_ImageDetails);
 
             if (message_length)
             {
