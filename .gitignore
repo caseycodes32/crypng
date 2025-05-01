@@ -1,4 +1,6 @@
 /Output
+/Debug
+/Release
 /.vscode
 .vscode/settings.json
 
