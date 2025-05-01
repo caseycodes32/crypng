@@ -9,7 +9,7 @@ void UIHelper::ImGuiDisplayKeyPhrase(unsigned char* key, int key_length)
     ImGui::Text("Key Phrase (Please Copy!):");
 
     std::string str_keyphrase = "";
-    for (int i = 0; i < 16; i++) 
+    for (int i = 0; i < key_length; i++) 
     {
         str_keyphrase.append(key_words[static_cast<int>(key[i])]);
         if ((i + 1) % 4 == 0) str_keyphrase.append("\n");
@@ -33,7 +33,7 @@ void UIHelper::ImGuiInputKeyPhrase(unsigned char* key, int key_length)
     {
         error_invalid_keyphrase = false;
         input_complete = false;
-        unsigned char possible_key[16];
+        unsigned char possible_key[key_length];
         int key_iterator = 0;
         std::string s_keyphrase(keyphrase_input_buf);
         std::stringstream ss_keyphrase(s_keyphrase);
@@ -57,9 +57,9 @@ void UIHelper::ImGuiInputKeyPhrase(unsigned char* key, int key_length)
                 return;
             }
         }
-        if (key_iterator == 16) 
+        if (key_iterator == key_length) 
         {
-            memcpy(key, possible_key, 16);
+            memcpy(key, possible_key, key_length);
             input_complete = true;
         }
         else error_invalid_keyphrase = true;
@@ -75,5 +75,6 @@ std::string UIHelper::ClampFileName(std::string file_name, int chars)
 {
     if (file_name.length() > chars)
         return ("..." + file_name.substr(chars - 3));
-    else return file_name;
+    else
+        return file_name;
 }
