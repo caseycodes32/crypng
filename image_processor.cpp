@@ -346,8 +346,8 @@ void PerformEncryptionPipeline(char *message, int message_length, unsigned char 
     if (message_buffer_len % AES_BLOCKLEN)
         message_buffer_len += AES_BLOCKLEN - (message_buffer_len % AES_BLOCKLEN);
 
-    if (message_buffer_len == 16)
-        message_buffer_len = 32;
+    if (message_buffer_len == AES_BLOCKLEN)
+        message_buffer_len = (AES_BLOCKLEN * 2);
 
     if (message_buffer_len == 0)
         return;
@@ -358,7 +358,7 @@ void PerformEncryptionPipeline(char *message, int message_length, unsigned char 
         GenerateRandomKey(private_key, key_length);
         size_t private_key_hash = HashMemory(private_key, key_length);
 
-        delta_mod_key_hash = (((private_key_hash % 4096) * 16) + 16) - message_buffer_len; // 65536 (max message buf) / 4
+        delta_mod_key_hash = (((private_key_hash % 4096) * AES_BLOCKLEN) + AES_BLOCKLEN) - message_buffer_len; // 65536 (max message buf) / 4
         if (delta_mod_key_hash == 0) break;
     }
 
@@ -391,7 +391,7 @@ void PerformDecryptionPipeline(char *message_buffer, int &message_length, unsign
     memset(init_vector, 0x9D, key_length);
 
     size_t private_key_hash = HashMemory(private_key, key_length);
-    int decoded_message_length = (((private_key_hash % 4096) * 16) + 16);
+    int decoded_message_length = (((private_key_hash % 4096) * AES_BLOCKLEN) + AES_BLOCKLEN);
 
     message_length = decoded_message_length;
 
