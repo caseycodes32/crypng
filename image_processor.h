@@ -24,9 +24,9 @@ struct Block
     int loc_y;
     uint8_t channels;
     int length;
-    float var;
+    double var;
     uint8_t max_var_channel;
-    float *mean;
+    double *mean;
 };
 
 struct EncryptionDetails

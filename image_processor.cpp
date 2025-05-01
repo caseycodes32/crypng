@@ -223,8 +223,8 @@ void CalculateBlockVar(Block &block)
     int n = BLOCK_SIZE * BLOCK_SIZE;
     int intensity_channels = std::min((int)block.channels, 3);
 
-    float mean[intensity_channels];
-    float variance[intensity_channels];
+    double mean[intensity_channels];
+    double variance[intensity_channels];
 
     for (int c = 0; c < intensity_channels; c++)
     {
@@ -240,7 +240,7 @@ void CalculateBlockVar(Block &block)
         variance[c] /= (n - 1);
     }
     
-    float *max_variance = std::max_element(variance, variance + intensity_channels);
+    double *max_variance = std::max_element(variance, variance + intensity_channels);
     block.var = *max_variance;
     block.max_var_channel = std::distance(variance, max_variance);
 }
@@ -248,13 +248,13 @@ void CalculateBlockVar(Block &block)
 // Quicksort functions PartitionBlocks() and QuicksortBlocks() derived from https://www.geeksforgeeks.org/cpp-program-for-quicksort/
 int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
 {
-    float pivot = vec_blocks.at(idx_high).var;
+    double pivot = vec_blocks.at(idx_high).var;
     
     int i = (idx_low - 1);
 
     for (int j = idx_low; j <= idx_high - 1; j++)
     {
-        if (vec_blocks.at(j).var <= pivot)
+        if (vec_blocks.at(j).var < pivot)
         {
             i++;
             std::swap(vec_blocks[i], vec_blocks[j]);
@@ -346,7 +346,8 @@ std::size_t HashMemory(unsigned char *data, int length)
 int PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
-    unsigned char init_vector[key_length] = { 0x9D };
+    unsigned char init_vector[key_length];
+    memset(init_vector, 0x00, key_length);
 
     int message_buffer_len = message_length;
     if (message_buffer_len % AES_BLOCKLEN)
@@ -397,15 +398,13 @@ int PerformEncryptionPipeline(char *message, int message_length, unsigned char *
 int PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
 {
     struct AES_ctx ctx;
-    unsigned char init_vector[key_length] = { 0x9D };
-    //memset(init_vector, 0x00, key_length);
+    unsigned char init_vector[key_length];
+    memset(init_vector, 0x00, key_length);
 
     size_t private_key_hash = HashMemory(private_key, key_length);
     int decoded_message_length = (((private_key_hash % 4096) * 16) + 16);
 
     message_length = decoded_message_length;
-
-    //GenerateRandomKey(init_vector, key_length);
 
     unsigned char *decrypted_message_buffer = new unsigned char[decoded_message_length];
     memset(decrypted_message_buffer, 0x00, decoded_message_length);
