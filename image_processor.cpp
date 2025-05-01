@@ -247,7 +247,7 @@ int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
 
     for (int j = idx_low; j <= idx_high - 1; j++)
     {
-        if (vec_blocks.at(j).var < pivot)
+        if (vec_blocks.at(j).var <= pivot)
         {
             i++;
             std::swap(vec_blocks[i], vec_blocks[j]);
@@ -336,7 +336,7 @@ std::size_t HashMemory(unsigned char *data, int length)
     return hash_value;
 }
 
-void PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
+void PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details, bool &complete)
 {
     struct AES_ctx ctx;
     unsigned char init_vector[key_length];
@@ -382,7 +382,16 @@ void PerformEncryptionPipeline(char *message, int message_length, unsigned char 
 
     WriteMessageToHighVarianceBlockLSB(encrypted_message_buffer, message_buffer_len, second_bit_blocks, image_details);
     delete(encrypted_message_buffer);
+
+    complete = true;
 }
+
+void ThreadPerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details, bool &complete)
+{
+    std::thread thread_pep(PerformEncryptionPipeline, message, message_length, private_key, key_length, image_details, std::ref(complete));
+    thread_pep.detach();
+}
+
 
 void PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details)
 {

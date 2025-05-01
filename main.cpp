@@ -195,6 +195,7 @@ int main(int, char**)
         {
             static char message_buf[65536] = { 0x00 };
             static unsigned char private_key[AES_KEYLEN];
+            static bool complete = false;
             
             if (m_ResetData)
             {
@@ -208,7 +209,12 @@ int main(int, char**)
             ImGui::Text("Characters Remaining: %d", (m_ImageDetails.max_chars - strlen(message_buf)));
 
             if (ImGui::Button("Encode", ImVec2(0.0f, 32.0f)))
-                PerformEncryptionPipeline(message_buf, strlen(message_buf), private_key, AES_KEYLEN, m_ImageDetails);
+            {
+                complete = false;
+                ThreadPerformEncryptionPipeline(message_buf, strlen(message_buf), private_key, AES_KEYLEN, m_ImageDetails, complete);
+            }
+            if (complete)
+                ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Encryption Completed");
 
             UIHelper::ImGuiDisplayKeyPhrase(private_key, AES_KEYLEN);
 
