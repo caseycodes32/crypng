@@ -167,9 +167,6 @@ int main(int, char**)
             {
                 LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
 
-                //TestEncode(m_ImageDetails);
-                //ImGui::Text("Decoded msg: %s", TestDecode(m_ImageDetails).c_str());
-
                 ImGuiDisplayImage(m_ImageDetails);
 
                 ImGui::Text("%s | %dx%d px | %d channels", m_ImageDetails.name.c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
@@ -190,30 +187,21 @@ int main(int, char**)
                 {
                     m_UIPage = RETRIEVE_MESSAGE;
                 }
-                /*
-                if (ImGui::Button("Save Image")) 
-                {
-                    SaveFileDialog(m_ImageOutputPath, hwnd);
-                    SaveDataToFile(m_ImageOutputPath, m_ImageDetails);
-                }
-                */
             }
         }
         else if (m_UIPage == HIDE_MESSAGE)
         {
             static char message_buf[65536] = { 0x00 };
             static unsigned char private_key[16];
-            static int message_length = 0;
 
             ImGui::Text("Enter a message to hide:");
             ImGui::InputTextMultiline("##Secret Text", message_buf, m_ImageDetails.max_chars, ImVec2(ImGui::GetContentRegionAvail().x, 192.0f));
             ImGui::Text("Characters Remaining: %d", (m_ImageDetails.max_chars - strlen(message_buf)));
 
             if (ImGui::Button("Encode", ImVec2(0.0f, 32.0f)))
-            message_length = PerformEncryptionPipeline(message_buf, strlen(message_buf), private_key, 16, m_ImageDetails);
+            PerformEncryptionPipeline(message_buf, strlen(message_buf), private_key, 16, m_ImageDetails);
 
             ImGuiDisplayKeyPhrase(private_key, 16);
-            ImGui::Text("len: %d", message_length);
 
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
             ImGui::Separator();
@@ -248,8 +236,10 @@ int main(int, char**)
                 ImGui::BeginChild("##MessageDisplay", ImVec2(0.0f, 128.0f), ImGuiChildFlags_Border);
                 ImGui::Text(message_buf);
                 ImGui::EndChild();
-                if (ImGui::Button("Copy", ImVec2(0.0f, 32.0f)))
+                if (ImGui::Button("Copy Message", ImVec2(0.0f, 32.0f)))
                     ImGui::SetClipboardText(message_buf);
+                ImGui::SameLine();
+                ImGui::Text("Note: Decoded text may be longer than \nmessage shown above");
             }
 
             ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));

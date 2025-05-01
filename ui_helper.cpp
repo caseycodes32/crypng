@@ -18,17 +18,19 @@ void ImGuiDisplayKeyPhrase(unsigned char* key, int key_length)
     ImGui::Text(str_keyphrase.c_str());
     ImGui::EndChild();
 
-    if (ImGui::Button("Copy Key Phrase To Clipboard", ImVec2(0.0f, 32.0f))) ImGui::SetClipboardText(str_keyphrase.c_str());
+    if (ImGui::Button("Copy Key Phrase", ImVec2(0.0f, 32.0f))) ImGui::SetClipboardText(str_keyphrase.c_str());
 }
 
 void ImGuiInputKeyPhrase(unsigned char* key, int key_length)
 {
     static bool error_invalid_keyphrase = false;
+    static bool input_complete = false;
     static char keyphrase_input_buf[1024];
     ImGui::InputTextMultiline("##Keyphrase Entry", keyphrase_input_buf, sizeof(keyphrase_input_buf), ImVec2(ImGui::GetContentRegionAvail().x, 0.0f));
     if (ImGui::Button("Confirm Keyphrase", ImVec2(0.0f, 32.0f)))
     {
         error_invalid_keyphrase = false;
+        input_complete = false;
         unsigned char possible_key[16];
         int key_iterator = 0;
         std::string s_keyphrase(keyphrase_input_buf);
@@ -53,9 +55,16 @@ void ImGuiInputKeyPhrase(unsigned char* key, int key_length)
                 return;
             }
         }
-        if (key_iterator == 16) memcpy(key, possible_key, 16);
+        if (key_iterator == 16) 
+        {
+            memcpy(key, possible_key, 16);
+            input_complete = true;
+        }
         else error_invalid_keyphrase = true;
     }
-    if (error_invalid_keyphrase) ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Error - Invalid Keyphrase Entered");
+    if (error_invalid_keyphrase)
+        ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Error - Invalid Keyphrase Entered");
+    else if (input_complete)
+        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Key Phrase Accepted");
 
 }
