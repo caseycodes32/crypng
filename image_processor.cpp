@@ -176,9 +176,12 @@ void LSBtoMSBChannel(ImageDetails image_details, int channel)
             for (int c = 0; c < image_details.channels; c++)
             {
                 if (c == channel)
-                    image_details.data[idx + c] =  image_details.data[idx + c] << 7;
+                    if (GetNthBitFromByte(image_details.data[idx + c], 0))
+                        image_details.data[idx + c] = 0xFE;
+                    else
+                    image_details.data[idx + c] = 0x00;
                 else
-                    image_details.data[idx + c] =  image_details.data[idx + c] >> 8;
+                    image_details.data[idx + c] = image_details.data[idx + c] >> 8;
             }
         }
     }
