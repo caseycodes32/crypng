@@ -294,31 +294,7 @@ int main(int, char**)
                 analyze_id = ImageDetails{};
                 OpenFileDialog(analyize_image_path, hwnd);
             }
-            if (ImGui::CollapsingHeader("View Composite LSBs"))
-            {
-                if (ImGui::Button("Compute & Display Image##1"))
-                {
-                    analyze_id.data = NULL;
-                    LoadDataFromFile(analyize_image_path, analyze_id);
-                    LSBtoMSB(analyze_id);
-                    analyze_id.data_id += 1;
-                }
-                ImGuiDisplayImage(analyze_id);
-            }
-            if (ImGui::CollapsingHeader("View Per-Channel LSB"))
-            {
-                static int selected_channel = 0;
-                ImGui::SliderInt("Channel", &selected_channel, 0, 3);
-                if (ImGui::Button("Compute & Display Image##0"))
-                {
-                    analyze_id.data = NULL;
-                    LoadDataFromFile(analyize_image_path, analyze_id);
-                    LSBtoMSBChannel(analyze_id, selected_channel);
-                    analyze_id.data_id += 1;
-                }
-                ImGuiDisplayImage(analyze_id);
-            }
-            if (ImGui::CollapsingHeader("View n-th bit plane"))
+            if (ImGui::CollapsingHeader("View n-th bit per-channel bit plane"))
             {
                 static int selected_channel = 0;
                 static int selected_bit = 0;
