@@ -99,8 +99,8 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init();
 
     LONG lStyle = GetWindowLong( hwnd, GWL_STYLE );
-    SetWindowLong( hwnd, GWL_STYLE, lStyle & 
-        (~(WS_CAPTION|WS_THICKFRAME|WS_MINIMIZEBOX|WS_SYSMENU ) ) );
+    //SetWindowLong( hwnd, GWL_STYLE, lStyle & 
+    //    (~(WS_CAPTION|WS_THICKFRAME|WS_MINIMIZEBOX|WS_SYSMENU ) ) );
     SetWindowLong( hwnd, GWL_EXSTYLE, GetWindowLong( hwnd, GWL_STYLE ) | WS_EX_LAYERED);
 
     SetLayeredWindowAttributes(hwnd, COLORREF(RGB(255, 0, 0)), 255, LWA_COLORKEY | LWA_ALPHA);
@@ -202,6 +202,7 @@ int main(int, char**)
                 m_ResetData = false;
                 memset(message_buf, 0x00, 65536);
                 memset(private_key, 0x00, AES_KEYLEN);
+                complete = false;
             }
 
             ImGui::Text("Enter a message to hide:");
@@ -225,11 +226,15 @@ int main(int, char**)
                 m_ImageDetails = ImageDetails{};
                 m_UIPage = SELECT_FILE;
             }
-            ImGui::SameLine(0.0f, 270.0f);
-            if (ImGui::Button("Save Image", ImVec2(0.0f, 32.0f)))
+
+            if (complete)
             {
-                SaveFileDialog(m_ImageOutputPath, hwnd);
-                SaveDataToFile(m_ImageOutputPath, m_ImageDetails);
+                ImGui::SameLine(0.0f, 270.0f);
+                if (ImGui::Button("Save Image", ImVec2(0.0f, 32.0f)))
+                {
+                    SaveFileDialog(m_ImageOutputPath, hwnd);
+                    SaveDataToFile(m_ImageOutputPath, m_ImageDetails);
+                }
             }
         }
         else if (m_UIPage == RETRIEVE_MESSAGE)
@@ -245,6 +250,7 @@ int main(int, char**)
                 memset(message_buf, 0x00, 65536);
                 memset(private_key, 0x00, AES_KEYLEN);
                 message_length = 0;
+                complete = false;
             }
 
             ImGui::Text("Enter the key phrase:");
