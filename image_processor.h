@@ -41,7 +41,7 @@ void TestEncode(ImageDetails image_details);
 std::string TestDecode(ImageDetails image_details);
 void ZeroLSB(ImageDetails image_details);
 void LSBtoMSB(ImageDetails image_details);
-void PopulateBitArrayAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image_details);
+void PopulateBitArray(bool *lsb, bool *second_lsb, ImageDetails image_details);
 std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details);
 void CalculateBlockStats(Block &block, int channel);
 int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);

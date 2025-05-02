@@ -166,7 +166,7 @@ void LSBtoMSB(ImageDetails image_details)
     }
 }
 
-void PopulateBitArrayAndZeroLSB(bool *second_lsb, ImageDetails image_details)
+void PopulateBitArray(bool *second_lsb, ImageDetails image_details)
 {
     for (int y = 0; y < image_details.height; y++)
     {
@@ -372,7 +372,7 @@ void XCrypt::PerformEncryptionPipeline(char *message, int message_length, unsign
     int bit_array_len = image_details.width * image_details.height * image_details.channels;
     bool *second_bits = new bool[bit_array_len];
 
-    PopulateBitArrayAndZeroLSB(second_bits, image_details);
+    PopulateBitArray(second_bits, image_details);
 
     std::vector<Block> second_bit_blocks = CreateBlockList(second_bits, image_details);
     delete(second_bits);
@@ -408,7 +408,7 @@ void XCrypt::PerformDecryptionPipeline(char *message_buffer, int &message_length
     int bit_array_len = image_details.width * image_details.height * image_details.channels;
     bool *second_bits = new bool[bit_array_len];
 
-    PopulateBitArrayAndZeroLSB(second_bits, image_details);
+    PopulateBitArray(second_bits, image_details);
 
     std::vector<Block> second_bit_blocks = CreateBlockList(second_bits, image_details);
     delete(second_bits);
