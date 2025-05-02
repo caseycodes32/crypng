@@ -19,7 +19,6 @@ struct WGL_WindowData { HDC hDC; };
 static const POINT      k_WindowSize = {400, 500};
 enum UIPage { SELECT_FILE, HIDE_MESSAGE, RETRIEVE_MESSAGE };
 
-
 // UI Data
 static HGLRC            g_hRC;
 static WGL_WindowData   g_MainWindow;
@@ -106,8 +105,6 @@ int main(int, char**)
     SetLayeredWindowAttributes(hwnd, COLORREF(RGB(255, 0, 0)), 255, LWA_COLORKEY | LWA_ALPHA);
 
     // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
     ImVec4 clear_color = ImVec4(1.0f, 0.0f, 0.0f, 1.00f);
 
     // Program specific initializations
@@ -297,7 +294,7 @@ int main(int, char**)
         // Present
         ::SwapBuffers(g_MainWindow.hDC);
     }
-    
+
     free(m_ImageDetails.data);
 
     ImGui_ImplOpenGL3_Shutdown();
