@@ -42,7 +42,7 @@ std::string TestDecode(ImageDetails image_details);
 void ZeroLSB(ImageDetails image_details);
 void LSBtoMSB(ImageDetails image_details);
 void LSBtoMSBChannel(ImageDetails image_details, int channel);
-void LSBtoMSBChannelNthBit(ImageDetails image_details, int channel, int bit);
+void LSBtoMSBChannelNthBit(ImageDetails image_details, int channel, bool composite, int bit);
 void PopulateBitArray(bool *lsb, bool *second_lsb, ImageDetails image_details);
 std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details);
 void CalculateBlockStats(Block &block, int channel);

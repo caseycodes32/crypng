@@ -180,6 +180,9 @@ void LSBtoMSBChannel(ImageDetails image_details, int channel)
                         image_details.data[idx + c] = 0xFE;
                     else
                     image_details.data[idx + c] = 0x00;
+
+                else if (c == 3)
+                    image_details.data[idx + c] = 0xFF;
                 else
                     image_details.data[idx + c] = image_details.data[idx + c] >> 8;
             }
@@ -187,7 +190,7 @@ void LSBtoMSBChannel(ImageDetails image_details, int channel)
     }
 }
 
-void LSBtoMSBChannelNthBit(ImageDetails image_details, int channel, int bit)
+void LSBtoMSBChannelNthBit(ImageDetails image_details, int channel, bool composite, int bit)
 {
     for (int y = 0; y < image_details.height; y++)
     {
@@ -197,11 +200,14 @@ void LSBtoMSBChannelNthBit(ImageDetails image_details, int channel, int bit)
             
             for (int c = 0; c < image_details.channels; c++)
             {
-                if (c == channel)
+                if (c == channel || composite)
                     if (GetNthBitFromByte(image_details.data[idx + c], bit))
                         image_details.data[idx + c] = 0xFE;
                     else
-                    image_details.data[idx + c] = 0x00;
+                        image_details.data[idx + c] = 0x00;
+                        
+                else if (c == 3)
+                    image_details.data[idx + c] = 0xFF;
                 else
                     image_details.data[idx + c] = image_details.data[idx + c] >> 8;
             }
