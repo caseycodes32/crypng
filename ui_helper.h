@@ -10,4 +10,5 @@ namespace UIHelper
     void ImGuiDisplayKeyPhrase(unsigned char* key, int key_length);
     void ImGuiInputKeyPhrase(unsigned char* key, int key_length);
     std::string ClampFileName(std::string file_name, int chars);
+    std::string ChannelCountToDescriptor(int channels);
 }

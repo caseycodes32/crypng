@@ -78,3 +78,14 @@ std::string UIHelper::ClampFileName(std::string file_name, int chars)
     else
         return file_name;
 }
+
+std::string UIHelper::ChannelCountToDescriptor(int channels)
+{
+    switch (channels)
+    {
+        case 4: return "RGBA";
+        case 3: return "RGB";
+        case 2: return "Grayscale+A";
+        default: return "Grayscale";
+    }
+}

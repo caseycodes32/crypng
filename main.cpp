@@ -170,7 +170,8 @@ int main(int, char**)
 
                 ImGuiDisplayImage(m_ImageDetails);
 
-                ImGui::Text("%s | %dx%d px | %d channels", UIHelper::ClampFileName(m_ImageDetails.name, 20).c_str(), m_ImageDetails.width, m_ImageDetails.height, m_ImageDetails.channels);
+
+                ImGui::Text("%s | %dx%d px | %s", UIHelper::ClampFileName(m_ImageDetails.name, 20).c_str(), m_ImageDetails.width, m_ImageDetails.height, UIHelper::ChannelCountToDescriptor(m_ImageDetails.channels).c_str());
                 ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
                 ImGui::Separator();
                 if (ImGui::Button("Select Another Image", ImVec2(0.0f, 32.0f)))
@@ -296,6 +297,8 @@ int main(int, char**)
         // Present
         ::SwapBuffers(g_MainWindow.hDC);
     }
+    
+    free(m_ImageDetails.data);
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplWin32_Shutdown();
