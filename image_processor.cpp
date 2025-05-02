@@ -188,54 +188,53 @@ std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details)
 
     int block_width = BLOCK_SIZE * image_details.channels;
     int block_bytes = block_width * BLOCK_SIZE;
+    int intensity_channels = std::min(image_details.channels, 3);
 
     for (int y = 0; y < image_details.height - BLOCK_SIZE; y += BLOCK_SIZE)
     {
         for (int x = 0; x < image_details.width - BLOCK_SIZE; x += BLOCK_SIZE)
         {
-            Block current_block;
-            current_block.loc_x = x;
-            current_block.loc_y = y;
-            current_block.channels = image_details.channels;
-            current_block.length = block_bytes;
-            current_block.block_bits = new bool[block_bytes];
+            for (int c = 0; c < intensity_channels; c++)
+            {
+                Block current_block;
+                current_block.loc_x = x;
+                current_block.loc_y = y;
+                current_block.length = block_bytes;
+                current_block.image_channels = image_details.channels;
+                current_block.block_channel = c;
+                current_block.block_bits = new bool[block_bytes];
 
-            for (int i = 0; i < BLOCK_SIZE; i++)
-                memcpy(current_block.block_bits + (i * block_width), bits + (((y + i) * image_details.width + x) * image_details.channels), block_width);
+                for (int i = 0; i < BLOCK_SIZE; i++)
+                    memcpy(current_block.block_bits + (i * block_width), bits + (((y + i) * image_details.width + x) * image_details.channels), block_width);
 
-            CalculateBlockStats(current_block);
-            block_list.push_back(current_block);
-            delete(current_block.block_bits);
+                CalculateBlockStats(current_block, c);
+                block_list.push_back(current_block);
+                delete(current_block.block_bits);
+            }
         }
     }
     return block_list;
 }
 
-void CalculateBlockStats(Block &block)
+void CalculateBlockStats(Block &block, int channel)
 {
     int n = BLOCK_SIZE * BLOCK_SIZE;
-    int intensity_channels = std::min((int)block.channels, 3);
 
-    double mean[intensity_channels];
-    double variance[intensity_channels];
+    double mean;
+    double variance;
 
-    for (int c = 0; c < intensity_channels; c++)
-    {
-        for (int i = c; i < block.length; i += block.channels)
-            mean[c] += block.block_bits[i];
+    for (int i = channel; i < block.length; i += block.image_channels)
+        mean += block.block_bits[i];
 
-        mean[c] /= n;
-        block.mean = mean;
+    mean /= n;
+    block.mean = mean;
 
-        for (int i = c; i < block.length; i += block.channels)
-            variance[c] += ((block.block_bits[i] - mean[c]) * (block.block_bits[i] - mean[c]));
-        
-        variance[c] /= (n - 1);
-    }
+    for (int i = channel; i < block.length; i += block.image_channels)
+        variance += ((block.block_bits[i] - mean) * (block.block_bits[i] - mean));
     
-    double *max_variance = std::max_element(variance, variance + intensity_channels);
-    block.var = *max_variance;
-    block.max_var_channel = std::distance(variance, max_variance);
+    variance /= (n - 1);
+    
+    block.var = variance;
 }
 
 // Quicksort functions PartitionBlocks() and QuicksortBlocks() derived from https://www.geeksforgeeks.org/cpp-program-for-quicksort/
@@ -286,9 +285,9 @@ void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int messa
 
                     bool bit_mask = GetNthBitFromByte(message_buffer[message_buf_iterator_bit / 8], message_buf_iterator_bit % 8);
 
-                    image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] >> 1;
-                    image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] << 1;
-                    image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel] | bit_mask;
+                    image_details.data[image_byte_loc + vec_blocks.at(i).block_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).block_channel] >> 1;
+                    image_details.data[image_byte_loc + vec_blocks.at(i).block_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).block_channel] << 1;
+                    image_details.data[image_byte_loc + vec_blocks.at(i).block_channel] = image_details.data[image_byte_loc + vec_blocks.at(i).block_channel] | bit_mask;
 
                     message_buf_iterator_bit++;
                 }
@@ -312,7 +311,7 @@ void ReadMessageFromHighVarianceBlockLSB(unsigned char *message_buffer, int mess
                 {
                     int image_byte_loc = (((vec_blocks.at(i).loc_y + by) * image_details.width) + vec_blocks.at(i).loc_x + bx) * image_details.channels;
 
-                    bool current_bit = GetNthBitFromByte(image_details.data[image_byte_loc + vec_blocks.at(i).max_var_channel], 0);
+                    bool current_bit = GetNthBitFromByte(image_details.data[image_byte_loc + vec_blocks.at(i).block_channel], 0);
 
                     AppendBitToArray(message_buffer, message_buf_iterator_bit, current_bit);
 

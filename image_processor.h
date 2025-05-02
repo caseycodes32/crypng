@@ -7,7 +7,6 @@
 #include <random>
 #include <ctime>
 #include <cmath>
-#include <limits>
 #include <algorithm>
 #include <bitset>
 #include "aes.h"
@@ -21,13 +20,13 @@ const uint8_t BLOCK_SIZE = 8;
 struct Block
 {
     bool *block_bits;
+    int length;
     int loc_x;
     int loc_y;
-    uint8_t channels;
-    int length;
+    uint8_t image_channels;
+    uint8_t block_channel;
     double var;
-    uint8_t max_var_channel;
-    double *mean;
+    double mean;
 };
 
 std::string test_aes();
@@ -44,7 +43,7 @@ void ZeroLSB(ImageDetails image_details);
 void LSBtoMSB(ImageDetails image_details);
 void PopulateBitArrayAndZeroLSB(bool *lsb, bool *second_lsb, ImageDetails image_details);
 std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details);
-void CalculateBlockStats(Block &block);
+void CalculateBlockStats(Block &block, int channel);
 int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 void QuicksortBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details);
