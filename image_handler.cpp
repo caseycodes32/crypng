@@ -171,7 +171,8 @@ void CopyImageInMemory(ImageDetails id_current, ImageDetails &id_new)
 size_t GetMaximumCharactersFromImage(ImageDetails image_details)
 {
     size_t blocks = (image_details.width / 8) * (image_details.height / 8);
-    size_t max_bytes = blocks * 8;
+    int intensity_channels = std::min(image_details.channels, 3);
+    size_t max_bytes = blocks * intensity_channels * 8;
     return max_bytes;
 }
 
