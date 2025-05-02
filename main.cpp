@@ -322,13 +322,15 @@ int main(int, char**)
             {
                 static int selected_channel = 0;
                 static int selected_bit = 0;
+                static bool composite = false;
                 ImGui::SliderInt("Channel", &selected_channel, 0, 3);
                 ImGui::SliderInt("Bit Index", &selected_bit, 0, 7);
+                ImGui::Checkbox("Composite", &composite);
                 if (ImGui::Button("Compute & Display Image##0"))
                 {
                     analyze_id.data = NULL;
                     LoadDataFromFile(analyize_image_path, analyze_id);
-                    LSBtoMSBChannelNthBit(analyze_id, selected_channel, selected_bit);
+                    LSBtoMSBChannelNthBit(analyze_id, selected_channel, composite, selected_bit);
                     analyze_id.data_id += 1;
                 }
                 ImGuiDisplayImage(analyze_id);
