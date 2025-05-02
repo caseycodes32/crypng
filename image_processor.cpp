@@ -173,14 +173,13 @@ void LSBtoMSBChannel(ImageDetails image_details, int channel)
         {
             int idx = (y * image_details.width + x) * image_details.channels;
             
-            for (int c = 0; c < std::min(image_details.channels, 3); c++)
+            for (int c = 0; c < image_details.channels; c++)
             {
                 if (c == channel)
                     image_details.data[idx + c] =  image_details.data[idx + c] << 7;
                 else
                     image_details.data[idx + c] =  image_details.data[idx + c] >> 8;
             }
-
         }
     }
 }
