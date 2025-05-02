@@ -187,6 +187,28 @@ void LSBtoMSBChannel(ImageDetails image_details, int channel)
     }
 }
 
+void LSBtoMSBChannelNthBit(ImageDetails image_details, int channel, int bit)
+{
+    for (int y = 0; y < image_details.height; y++)
+    {
+        for (int x = 0; x < image_details.width; x++)
+        {
+            int idx = (y * image_details.width + x) * image_details.channels;
+            
+            for (int c = 0; c < image_details.channels; c++)
+            {
+                if (c == channel)
+                    if (GetNthBitFromByte(image_details.data[idx + c], bit))
+                        image_details.data[idx + c] = 0xFE;
+                    else
+                    image_details.data[idx + c] = 0x00;
+                else
+                    image_details.data[idx + c] = image_details.data[idx + c] >> 8;
+            }
+        }
+    }
+}
+
 void PopulateBitArray(bool *second_lsb, ImageDetails image_details)
 {
     for (int y = 0; y < image_details.height; y++)
