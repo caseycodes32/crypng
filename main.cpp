@@ -211,7 +211,7 @@ int main(int, char**)
             if (ImGui::Button("Encode", ImVec2(0.0f, 32.0f)))
             {
                 complete = false;
-                ThreadPerformEncryptionPipeline(message_buf, strlen(message_buf), private_key, AES_KEYLEN, m_ImageDetails, complete);
+                XCrypt::ThreadPerformEncryptionPipeline(message_buf, strlen(message_buf), private_key, AES_KEYLEN, m_ImageDetails, complete);
             }
             if (complete)
                 ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Encryption Completed");
@@ -237,6 +237,7 @@ int main(int, char**)
             static char message_buf[65536];
             static unsigned char private_key[AES_KEYLEN];
             static int message_length = 0;
+            static bool complete = false;
             
             if (m_ResetData)
             {
@@ -250,7 +251,10 @@ int main(int, char**)
             UIHelper::ImGuiInputKeyPhrase(private_key, AES_KEYLEN);
 
             if (ImGui::Button("Decode Message", ImVec2(0.0f, 32.0f)))
-                PerformDecryptionPipeline(message_buf, message_length, private_key, AES_KEYLEN, m_ImageDetails);
+            {
+                complete = false;
+                XCrypt::ThreadPerformDecryptionPipeline(message_buf, message_length, private_key, AES_KEYLEN, m_ImageDetails, complete);
+            }
 
             if (message_length)
             {

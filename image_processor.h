@@ -30,11 +30,6 @@ struct Block
     double *mean;
 };
 
-struct EncryptionDetails
-{
-    int message_buffer_len;
-};
-
 std::string test_aes();
 void InitializeRandomSeed();
 void GenerateRandomKey(unsigned char *key, size_t length);
@@ -55,6 +50,11 @@ void QuicksortBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high);
 void WriteMessageToHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details);
 void ReadMessageFromHighVarianceBlockLSB(unsigned char *message_buffer, int message_length, std::vector<Block> vec_blocks, ImageDetails image_details);
 std::size_t HashMemory(unsigned char *data, int length);
-void PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details, bool &complete);
-void ThreadPerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details, bool &complete);
-void PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details);
+
+namespace XCrypt
+{
+    void PerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details, bool &complete);
+    void ThreadPerformEncryptionPipeline(char *message, int message_length, unsigned char *private_key, int key_length, ImageDetails image_details, bool &complete);
+    void PerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details, bool &complete);
+    void ThreadPerformDecryptionPipeline(char *message_buffer, int &message_length, unsigned char *private_key, int key_length, ImageDetails image_details, bool &complete);
+}
