@@ -159,9 +159,28 @@ void LSBtoMSB(ImageDetails image_details)
             
             for (int c = 0; c < std::min(image_details.channels, 3); c++)
             {
-                //image_details.data[idx + c] =  image_details.data[idx + c] >> 1;
                 image_details.data[idx + c] =  image_details.data[idx + c] << 7;
             }
+        }
+    }
+}
+
+void LSBtoMSBChannel(ImageDetails image_details, int channel)
+{
+    for (int y = 0; y < image_details.height; y++)
+    {
+        for (int x = 0; x < image_details.width; x++)
+        {
+            int idx = (y * image_details.width + x) * image_details.channels;
+            
+            for (int c = 0; c < std::min(image_details.channels, 3); c++)
+            {
+                if (c == channel)
+                    image_details.data[idx + c] =  image_details.data[idx + c] << 7;
+                else
+                    image_details.data[idx + c] =  image_details.data[idx + c] >> 8;
+            }
+
         }
     }
 }

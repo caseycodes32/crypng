@@ -17,6 +17,7 @@ struct ImageDetails
     int normalized_height;
     int channels;
     size_t max_chars;
+    int data_id;
 };
 
 std::string FilenameFromPath(std::string path);

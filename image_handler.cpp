@@ -86,6 +86,7 @@ bool LoadDataFromFile(std::string image_path, ImageDetails &image_details)
     }
 
     image_details.max_chars = std::min(GetMaximumCharactersFromImage(image_details), size_t(25536));
+    image_details.data_id = 0;
     
     return true;
 }
@@ -180,6 +181,7 @@ void ImGuiDisplayImage(ImageDetails image_details)
 {
     static GLuint gl_image_texture = 0;
     static unsigned char *ptr_image_data = 0;
+    static int image_data_id = image_details.data_id;
 
     if (ptr_image_data != image_details.data)
     {
@@ -187,9 +189,14 @@ void ImGuiDisplayImage(ImageDetails image_details)
         glDeleteTextures(1, &gl_image_texture);
         gl_image_texture = 0;
     }
+    else if (image_data_id != image_details.data_id)
+    {
+        gl_image_texture = 0;
+    }
     LoadTextureFromData(&gl_image_texture, image_details, true);
     ImGui::Image((ImTextureID)(intptr_t)gl_image_texture, ImVec2(image_details.normalized_width, image_details.normalized_height));
     ptr_image_data = image_details.data;
+    image_data_id = image_details.data_id;
 }
 
 void ImGuiDisplayLogo()

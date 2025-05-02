@@ -17,7 +17,7 @@ struct WGL_WindowData { HDC hDC; };
 
 // Constants
 static const POINT      k_WindowSize = {400, 500};
-enum UIPage { SELECT_FILE, HIDE_MESSAGE, RETRIEVE_MESSAGE };
+enum UIPage { SELECT_FILE, HIDE_MESSAGE, RETRIEVE_MESSAGE, ANALYZE };
 
 // UI Data
 static HGLRC            g_hRC;
@@ -147,6 +147,8 @@ int main(int, char**)
         ImGui::SetNextWindowSize(ImVec2(k_WindowSize.x, k_WindowSize.y));
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::Begin("crypng", &open, dwFlag);
+
+        if (ImGui::IsKeyPressed(ImGuiKey_F4)) m_UIPage = UIPage::ANALYZE;
 
         if (m_UIPage == SELECT_FILE)
         {
@@ -281,6 +283,45 @@ int main(int, char**)
                 m_UIPage = SELECT_FILE;
             }
         }
+        else if (m_UIPage == ANALYZE)
+        {
+            static std::string analyize_image_path = "";
+            static ImageDetails analyze_id;
+
+            ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), "[Analysis Menu] Select an Operation:");
+            if (ImGui::Button("Select Image", ImVec2(ImGui::GetContentRegionAvail().x, 32.0f)))
+            {
+                analyze_id = ImageDetails{};
+                OpenFileDialog(analyize_image_path, hwnd);
+            }
+            if (ImGui::CollapsingHeader("View Per-Channel LSB"))
+            {
+                static int selected_channel = 0;
+                ImGui::SliderInt("Channel", &selected_channel, 0, 4);
+                if (ImGui::Button("Compute & Display Image"))
+                {
+                    //free(analyze_id.data);
+                    analyze_id.data = NULL;
+                    LoadDataFromFile(analyize_image_path, analyze_id);
+                    LSBtoMSBChannel(analyze_id, selected_channel);
+                    analyze_id.data_id += 1;
+                }
+                ImGuiDisplayImage(analyze_id);
+            }
+            if (ImGui::CollapsingHeader("View Composite LSBs"))
+            {
+
+            }
+            if (ImGui::CollapsingHeader("View n-th bit plane"))
+            {
+
+            }
+            if (ImGui::CollapsingHeader("Compare LSBs"))
+            {
+
+            }
+        }
+
         
         ImGui::End();
 
