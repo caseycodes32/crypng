@@ -32,6 +32,7 @@ struct Block
 std::string test_aes();
 void InitializeRandomSeed();
 void GenerateRandomKey(unsigned char *key, size_t length);
+void ThreadworthyGenerateRandomKey(unsigned char *key, size_t length);
 bool GenerateRandomBit(float prob);
 bool GetNthBitFromByte(unsigned char byte, int n);
 bool GetBitFromArray(unsigned char *message, size_t index);

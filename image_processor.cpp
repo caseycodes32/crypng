@@ -33,6 +33,16 @@ void GenerateRandomKey(unsigned char *key, size_t length)
         key[i] = std::rand() % (0xFF + 1);
 }
 
+void ThreadworthyGenerateRandomKey(unsigned char *key, size_t length)
+{
+    static std::random_device rand_device;
+    std::mt19937 generator(rand_device());
+    std::uniform_int_distribution<> distribution(0x00, 0xFF);
+
+    for (int i = 0; i < length; i++)
+        key[i] = distribution(generator);
+}
+
 bool GenerateRandomBit(float prob)
 {
     int rand = std::rand() % 100;
@@ -417,7 +427,7 @@ void XCrypt::PerformEncryptionPipeline(char *message, int message_length, unsign
     long long delta_mod_key_hash = 0;
     while (true)
     {
-        GenerateRandomKey(private_key, key_length);
+        ThreadworthyGenerateRandomKey(private_key, key_length);
         size_t private_key_hash = HashMemory(private_key, key_length);
 
         delta_mod_key_hash = (((private_key_hash % 4096) * AES_BLOCKLEN) + AES_BLOCKLEN) - message_buffer_len; // 65536 (max message buf) / 4
