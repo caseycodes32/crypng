@@ -267,10 +267,10 @@ std::vector<Block> CreateBlockList(bool *bits, ImageDetails image_details)
 
 void CalculateBlockStats(Block &block, int channel)
 {
+    
     int n = BLOCK_SIZE * BLOCK_SIZE;
 
     double mean;
-    double variance;
 
     for (int i = channel; i < block.length; i += block.image_channels)
         mean += block.block_bits[i];
@@ -278,24 +278,38 @@ void CalculateBlockStats(Block &block, int channel)
     mean /= n;
     block.mean = mean;
 
+    /*
+    double variance;
     for (int i = channel; i < block.length; i += block.image_channels)
         variance += ((block.block_bits[i] - mean) * (block.block_bits[i] - mean));
     
     variance /= (n - 1);
     
     block.var = variance;
+    */
+
+    int block_px = BLOCK_SIZE * BLOCK_SIZE;
+    double block_noise = 0;
+    int start_idx = block.image_channels + channel;
+
+    for (int i = start_idx; i < block.length - block.image_channels; i += block.image_channels)
+    {
+        if (block.block_bits[i - block.image_channels] != block.block_bits[i]) block_noise += 0.5;
+        if (block.block_bits[i + block.image_channels] != block.block_bits[i]) block_noise += 0.5;
+    }
+    block.noise_score = block_noise / (block_px - 1);
 }
 
 // Quicksort functions PartitionBlocks() and QuicksortBlocks() derived from https://www.geeksforgeeks.org/cpp-program-for-quicksort/
 int PartitionBlocks(std::vector<Block> &vec_blocks, int idx_low, int idx_high)
 {
-    double pivot = vec_blocks.at(idx_high).var;
+    double pivot = vec_blocks.at(idx_high).noise_score;
     
     int i = (idx_low - 1);
 
     for (int j = idx_low; j <= idx_high - 1; j++)
     {
-        if (vec_blocks.at(j).var < pivot)
+        if (vec_blocks.at(j).noise_score < pivot)
         {
             i++;
             std::swap(vec_blocks[i], vec_blocks[j]);

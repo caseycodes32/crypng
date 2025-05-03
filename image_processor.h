@@ -25,8 +25,8 @@ struct Block
     int loc_y;
     uint8_t image_channels;
     uint8_t block_channel;
-    double var;
     double mean;
+    double noise_score;
 };
 
 std::string test_aes();
