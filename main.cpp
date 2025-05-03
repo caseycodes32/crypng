@@ -115,7 +115,7 @@ int main(int, char**)
     style.Colors[ImGuiCol_Button] = ImVec4(0.00f, 0.65f, 0.65f, 0.46f);
     style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.01f, 1.00f, 1.00f, 0.43f);
     style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.62f);
-    style.Colors[ImGuiCol_Header] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+    style.Colors[ImGuiCol_Header] = ImVec4(0.00f, 1.00f, 1.00f, 0.32f);
     style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 1.00f, 1.00f, 0.42f);
     style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.00f, 1.00f, 1.00f, 0.54f);
     style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.00f, 1.00f, 1.00f, 0.54f);
@@ -132,8 +132,7 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init();
 
     LONG lStyle = GetWindowLong( hwnd, GWL_STYLE );
-    //SetWindowLong( hwnd, GWL_STYLE, lStyle & 
-    //    (~(WS_CAPTION|WS_THICKFRAME|WS_MINIMIZEBOX|WS_SYSMENU ) ) );
+
     SetWindowLong( hwnd, GWL_EXSTYLE, GetWindowLong( hwnd, GWL_STYLE ) | WS_EX_LAYERED);
 
     SetLayeredWindowAttributes(hwnd, COLORREF(RGB(255, 0, 0)), 255, LWA_COLORKEY | LWA_ALPHA);
