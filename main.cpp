@@ -289,7 +289,7 @@ int main(int, char**)
             static std::string analyze_image_savepath = "";
             static ImageDetails analyze_id;
 
-            ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), "[Analysis Menu] Select an Operation:");
+            ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), "[Analysis Menu] Select an Image and Operation:");
             if (ImGui::Button("Select Image", ImVec2(ImGui::GetContentRegionAvail().x, 32.0f)))
             {
                 analyze_id = ImageDetails{};
@@ -316,20 +316,20 @@ int main(int, char**)
             {
 
             }
-
-            ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
-            ImGui::Separator();
-            if (ImGui::Button("Back", ImVec2(0.0f, 32.0f)))
+            if (ImGui::CollapsingHeader("Navigation"))
             {
-                m_ImageDetails = ImageDetails{};
-                m_UIPage = SELECT_FILE;
-            }
+                if (ImGui::Button("Back", ImVec2(0.0f, 32.0f)))
+                {
+                    m_ImageDetails = ImageDetails{};
+                    m_UIPage = SELECT_FILE;
+                }
 
-            ImGui::SameLine(0.0f, 270.0f);
-            if (ImGui::Button("Save Image", ImVec2(0.0f, 32.0f)))
-            {
-                SaveFileDialog(analyze_image_savepath, hwnd);
-                SaveDataToFile(analyze_image_savepath, analyze_id);
+                ImGui::SameLine(0.0f, 270.0f);
+                if (ImGui::Button("Save Image", ImVec2(0.0f, 32.0f)))
+                {
+                    SaveFileDialog(analyze_image_savepath, hwnd);
+                    SaveDataToFile(analyze_image_savepath, analyze_id);
+                }
             }
         }
 
