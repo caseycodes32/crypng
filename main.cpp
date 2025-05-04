@@ -190,6 +190,8 @@ int main(int, char**)
                 ImGuiDisplayLogo();
                 ImGui::Text("Thanks for using crypng by Kyle Meyer");
                 ImGui::Text("Select a PNG image to get started");
+                ImGui::SameLine();
+                ImGui::TextColored(ImVec4(1.0f, 0.5f, 1.0f, 1.0f), "[F4] - Analyze");
                 if (ImGui::Button("Select Image", ImVec2(ImGui::GetContentRegionAvail().x, 32.0f)))
                 {
                     m_ImageDetails = ImageDetails{};
@@ -201,7 +203,6 @@ int main(int, char**)
                 LoadDataFromFile(m_ImageInputPath, m_ImageDetails);
 
                 ImGuiDisplayImage(m_ImageDetails);
-
 
                 ImGui::Text("%s | %dx%d px | %s", UIHelper::ClampFileName(m_ImageDetails.name, 20).c_str(), m_ImageDetails.width, m_ImageDetails.height, UIHelper::ChannelCountToDescriptor(m_ImageDetails.channels).c_str());
                 ImGui::SetCursorPos(ImVec2(8.0f, 456.0f));
@@ -322,7 +323,7 @@ int main(int, char**)
             static std::string analyze_image_savepath = "";
             static ImageDetails analyze_id;
 
-            ImGui::TextColored(ImVec4(0.5f, 0.5f, 1.0f, 1.0f), "[Analysis Menu] Select an Image and Operation:");
+            ImGui::TextColored(ImVec4(0.5f, 1.0f, 1.0f, 1.0f), "[Analysis Menu] Select an Image and Operation:");
             if (ImGui::Button("Select Image", ImVec2(ImGui::GetContentRegionAvail().x, 32.0f)))
             {
                 analyze_id = ImageDetails{};
@@ -345,11 +346,7 @@ int main(int, char**)
                 }
                 ImGuiDisplayImage(analyze_id);
             }
-            if (ImGui::CollapsingHeader("Compare LSBs"))
-            {
-
-            }
-            if (ImGui::CollapsingHeader("Navigation"))
+            if (ImGui::CollapsingHeader("Options"))
             {
                 if (ImGui::Button("Back", ImVec2(0.0f, 32.0f)))
                 {
