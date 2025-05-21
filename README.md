@@ -5,7 +5,7 @@ crypng is a LSB steganography software that encodes/decodes hidden messages in t
 
 ## Methodology
 
-crypng first encrypts a given message using AES-CBC. The message length is calculated using a hash of the key, so iteration is used to find an appropriate 128-bit AES key. Next, it performs bit plane slicing to acquire the second bit plane for each intensity channel. Then, it uses a specialized algorithm to score the noise of each of these bit planes. The bit planes are broken up into 8x8 blocks, then quicksort is used to sort them by noise score. Finally, the encoded message is encoded to the LSBs correlated with the noisiest blocks. 
+crypng first encrypts a given message using AES-CBC. The message length is calculated using a hash of the key, so iteration is used to find an appropriate 128-bit AES key. Next, it performs bit plane slicing to acquire the second bit plane for each intensity channel. Then, it uses a specialized algorithm to score the noise of each of these bit planes. The bit planes are broken up into 8x8 blocks, then quicksort is used to sort them by noise score. Finally, the encoded message is written to the LSBs correlated with the noisiest blocks. 
 
 ## Getting Started
 
